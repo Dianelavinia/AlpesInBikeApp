@@ -1,65 +1,68 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Design system Alpes in Bike, partagé avec le web.
+ * Mêmes couleurs, mêmes typos.
  */
 
-import '@/global.css';
-
-import { Platform } from 'react-native';
-
 export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+  brand: {
+    orange: "#E15A23",
+    orangeDark: "#B8431A",
+    orangeLight: "#F6B595",
+    forest: "#0D4F3D",
+    forestDark: "#06301E",
+    forestLight: "#4B916D",
+    cream: "#FAF7F2",
+    ink: "#0A0A0A",
   },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+  text: {
+    primary: "#0A0A0A",
+    secondary: "#525252",
+    muted: "#a8a29e",
+    inverse: "#FFFFFF",
   },
-} as const;
-
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
-
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
+  bg: {
+    base: "#FAF7F2",
+    card: "#FFFFFF",
+    elevated: "#F5F4F0",
+    inverse: "#0A0A0A",
   },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
+  border: {
+    subtle: "#F5F4F0",
+    base: "#E7E5E4",
+    strong: "#A8A29E",
   },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
+  status: {
+    success: "#0D4F3D",
+    warning: "#E15A23",
+    error: "#B8431A",
   },
-});
+};
 
 export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
-} as const;
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+  xxxl: 64,
+};
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const Radius = {
+  sm: 12,
+  md: 18,
+  lg: 24,
+  xl: 32,
+  pill: 999,
+};
+
+export const Type = {
+  body: { fontSize: 16, lineHeight: 24 },
+  bodySm: { fontSize: 14, lineHeight: 20 },
+  bodyXs: { fontSize: 12, lineHeight: 16 },
+  display1: { fontSize: 40, lineHeight: 44, fontWeight: "600" as const },
+  display2: { fontSize: 32, lineHeight: 36, fontWeight: "600" as const },
+  display3: { fontSize: 24, lineHeight: 28, fontWeight: "600" as const },
+  display4: { fontSize: 18, lineHeight: 22, fontWeight: "600" as const },
+  label: { fontSize: 12, lineHeight: 16, fontWeight: "600" as const, letterSpacing: 1.5, textTransform: "uppercase" as const },
+};
