@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
 import { t } from "@/lib/i18n";
+import CarbonHomeWidget from "@/components/CarbonHomeWidget";
 
 export default function Home() {
   const router = useRouter();
@@ -65,6 +66,8 @@ export default function Home() {
             <FeatureCard icon="battery-charging" tone={Colors.brand.orange} label="Assistant VAE" desc="68% · 92 km" onPress={() => router.push("/vae")} />
           </View>
         </View>
+
+        <CarbonHomeWidget />
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Tous vos outils</Text>

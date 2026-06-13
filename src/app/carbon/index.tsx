@@ -6,13 +6,7 @@ import { useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Circle } from "react-native-svg";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
-
-type Equivalent = {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  value: string;
-  tint: string;
-};
+import CarbonImpactBoard from "@/components/CarbonImpactBoard";
 
 type Donation = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -29,13 +23,6 @@ type Trophy = {
   tint: string;
   earned: boolean;
 };
-
-const EQUIVALENTS: Equivalent[] = [
-  { icon: "car-outline", title: "Carbone non émis", value: "47 trajets voiture évités", tint: Colors.brand.forest },
-  { icon: "cash-outline", title: "Économies essence", value: "118 L de carburant", tint: Colors.brand.orange },
-  { icon: "cloud-outline", title: "Air protégé", value: "312 kg CO2 absorbés", tint: Colors.brand.forestLight },
-  { icon: "leaf-outline", title: "Arbres équivalents", value: "14 arbres plantés", tint: Colors.brand.forest },
-];
 
 const DONATIONS: Donation[] = [
   {
@@ -123,22 +110,8 @@ export default function CarbonImpact() {
           <MiniStat icon="speedometer-outline" value="1 450" label="km parcourus" />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Équivalents concrets</Text>
-          <View style={{ gap: 10 }}>
-            {EQUIVALENTS.map((eq) => (
-              <View key={eq.title} style={styles.equivRow}>
-                <View style={[styles.equivIcon, { backgroundColor: `${eq.tint}18` }]}>
-                  <Ionicons name={eq.icon} size={20} color={eq.tint} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.equivTitle}>{eq.title}</Text>
-                  <Text style={styles.equivValue}>{eq.value}</Text>
-                </View>
-                <Ionicons name="checkmark-circle" size={20} color={Colors.brand.forest} />
-              </View>
-            ))}
-          </View>
+        <View style={{ marginTop: Spacing.xl }}>
+          <CarbonImpactBoard />
         </View>
 
         <View style={styles.section}>
