@@ -20,7 +20,8 @@ const SECTIONS = [
       { icon: "navigate-outline" as const, label: "Précision GPS", hint: "Haute", color: Colors.brand.orange },
       { icon: "battery-charging-outline" as const, label: "Mode économie batterie", hint: "Auto", color: Colors.brand.forest },
       { icon: "cloud-offline-outline" as const, label: "Cartes hors-ligne", hint: "3 zones téléchargées", color: Colors.brand.forest },
-      { icon: "watch-outline" as const, label: "Appareils connectés", hint: "Apple Watch", color: "#0369A1" },
+      { icon: "watch-outline" as const, label: "Appareils et synchros", hint: "Apple Watch · Polar", color: "#0369A1", route: "/settings/devices" },
+      { icon: "apps-outline" as const, label: "Widgets téléphone", hint: "4 formats", color: Colors.brand.orange, route: "/settings/widgets" },
     ],
   },
   {

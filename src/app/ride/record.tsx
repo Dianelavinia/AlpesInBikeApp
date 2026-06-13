@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useState, useEffect } from "react";
 import RideMap from "@/components/RideMap";
+import LiveEffortPanel from "@/components/LiveEffortPanel";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
 
 type Status = "idle" | "recording" | "paused";
@@ -68,6 +69,8 @@ export default function RecordRide() {
           <MetricBox label="Calories" value={Math.floor(elapsed * 4.2).toString()} unit="kcal" />
         </View>
       </View>
+
+      <LiveEffortPanel active={status === "recording"} />
 
       <View style={styles.controls}>
         {status === "idle" && (
