@@ -12,6 +12,8 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="booking/new" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
         <Stack.Screen name="bike/[slug]" />
+        <Stack.Screen name="ride/record" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
+        <Stack.Screen name="ride/[id]" />
         <Stack.Screen name="sos" options={{ presentation: "modal", animation: "fade" }} />
       </Stack>
     </SafeAreaProvider>

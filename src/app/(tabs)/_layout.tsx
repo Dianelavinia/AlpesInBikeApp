@@ -21,12 +21,13 @@ export default function TabsLayout() {
           paddingTop: 6,
           paddingBottom: bottomPad,
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "600", letterSpacing: 0.5, marginTop: 2 },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "600", letterSpacing: 0.3, marginTop: 2 },
         headerShown: false,
       }}
     >
       <Tabs.Screen name="home" options={{ title: t("tabs.home"), tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "home" : "home-outline"} size={22} color={color} /> }} />
       <Tabs.Screen name="bikes" options={{ title: t("tabs.bikes"), tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "bicycle" : "bicycle-outline"} size={24} color={color} /> }} />
+      <Tabs.Screen name="community" options={{ title: "Rides", tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "compass" : "compass-outline"} size={24} color={color} /> }} />
       <Tabs.Screen name="bookings" options={{ title: t("tabs.bookings"), tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "calendar" : "calendar-outline"} size={22} color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: t("tabs.profile"), tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} /> }} />
     </Tabs>
