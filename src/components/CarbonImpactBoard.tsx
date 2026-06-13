@@ -2,17 +2,19 @@ import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
-import { USER_CARBON, getFunEquivalents, getProjections, getMotivationalMessage } from "@/lib/carbon";
+import { useCarbonStats, getFunEquivalents, getProjections, getMotivationalMessage } from "@/lib/carbon";
 
 /**
  * Bloc visuel motivant à insérer dans l'écran bilan carbone.
- * Equivalents concrets parlants, projections, message motivant.
+ * Équivalents concrets parlants, projections fin d'année, message à palier.
  */
 
 export default function CarbonImpactBoard() {
-  const equivalents = getFunEquivalents(USER_CARBON.co2Saved);
-  const projections = getProjections(USER_CARBON);
-  const message = getMotivationalMessage(USER_CARBON.co2Saved);
+  const { stats } = useCarbonStats();
+  const equivalents = getFunEquivalents(stats.co2Saved);
+  const projections = getProjections(stats);
+  const message = getMotivationalMessage(stats.co2Saved);
+  const yearLabel = new Date().getFullYear();
 
   return (
     <View style={{ gap: Spacing.lg }}>
@@ -25,7 +27,7 @@ export default function CarbonImpactBoard() {
 
       <View>
         <View style={styles.sectionHead}>
-          <Text style={styles.sectionLabel}>Ça représente quoi 312 kg de CO2 ?</Text>
+          <Text style={styles.sectionLabel}>Ça représente quoi {stats.co2Saved} kg de CO2 ?</Text>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingRight: 16 }}>
           {equivalents.map((e, i) => (
@@ -46,7 +48,7 @@ export default function CarbonImpactBoard() {
           <View style={styles.projIcon}>
             <Ionicons name="trending-up" size={18} color={Colors.brand.forest} />
           </View>
-          <Text style={styles.projTitle}>À ce rythme, fin 2026</Text>
+          <Text style={styles.projTitle}>À ce rythme, fin {yearLabel}</Text>
         </View>
         <View style={styles.projRow}>
           <View style={styles.projItem}>
@@ -67,7 +69,7 @@ export default function CarbonImpactBoard() {
         <View style={[styles.projBadge, { backgroundColor: projections.onTrack ? "rgba(13,79,61,0.12)" : "rgba(245,158,11,0.12)" }]}>
           <Ionicons name={projections.onTrack ? "checkmark-circle" : "alert-circle"} size={13} color={projections.onTrack ? Colors.brand.forest : "#F59E0B"} />
           <Text style={[styles.projBadgeText, { color: projections.onTrack ? Colors.brand.forest : "#F59E0B" }]}>
-            {projections.onTrack ? "Vous êtes en avance sur votre objectif" : "Plus que quelques rides pour atteindre 500 kg"}
+            {projections.onTrack ? "Vous êtes en avance sur votre objectif" : `Plus que quelques rides pour atteindre ${stats.annualGoal} kg`}
           </Text>
         </View>
       </View>

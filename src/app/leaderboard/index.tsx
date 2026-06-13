@@ -1,12 +1,12 @@
-import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
+import { View, Text, Pressable, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
 import {
-  getLeaderboard,
+  useLeaderboard,
   getMotivation,
   METRIC_META,
   PERIOD_LABEL,
@@ -30,13 +30,15 @@ export default function Leaderboard() {
   const [period, setPeriod] = useState<Period>("month");
   const [metric, setMetric] = useState<Metric>("km");
 
-  const data = useMemo(() => getLeaderboard(scope, period, metric), [scope, period, metric]);
-  const motivation = getMotivation(data.meScopeRank, data.meScopeTotal, metric, data.topValue, data.meValue);
+  const { data, loading } = useLeaderboard(scope, period, metric);
   const meta = METRIC_META[metric];
-
-  const top3 = data.list.slice(0, 3);
-  const rest = data.list.slice(3);
   const scopeHint = useScopeHint(scope);
+
+  const empty = { list: [] as RankedRider[], total: 0, meScopeRank: null as number | null, meScopeTotal: 0, meValue: 0, topValue: 0 };
+  const safe = data ?? empty;
+  const motivation = getMotivation(safe.meScopeRank, safe.meScopeTotal, metric, safe.topValue, safe.meValue);
+  const top3 = safe.list.slice(0, 3);
+  const rest = safe.list.slice(3);
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -59,17 +61,17 @@ export default function Leaderboard() {
           <View style={styles.heroDivider} />
           <View style={styles.heroStats}>
             <View style={styles.heroStat}>
-              <Text style={styles.heroStatVal}>#{data.meScopeRank ?? "..."}</Text>
+              <Text style={styles.heroStatVal}>#{safe.meScopeRank ?? "..."}</Text>
               <Text style={styles.heroStatLabel}>Votre rang</Text>
             </View>
             <View style={styles.heroDividerV} />
             <View style={styles.heroStat}>
-              <Text style={styles.heroStatVal}>{formatValue(data.meValue, metric)}</Text>
+              <Text style={styles.heroStatVal}>{formatValue(safe.meValue, metric)}</Text>
               <Text style={styles.heroStatLabel}>{meta.label}</Text>
             </View>
             <View style={styles.heroDividerV} />
             <View style={styles.heroStat}>
-              <Text style={styles.heroStatVal}>{data.total}</Text>
+              <Text style={styles.heroStatVal}>{safe.total}</Text>
               <Text style={styles.heroStatLabel}>Rideurs</Text>
             </View>
           </View>
@@ -108,7 +110,14 @@ export default function Leaderboard() {
           })}
         </ScrollView>
 
-        {top3.length === 3 && (
+        {loading && (
+          <View style={styles.loadingBox}>
+            <ActivityIndicator size="small" color={Colors.brand.orange} />
+            <Text style={styles.loadingText}>Chargement du classement</Text>
+          </View>
+        )}
+
+        {!loading && top3.length === 3 && (
           <View style={styles.podium}>
             <PodiumColumn entry={top3[1]} height={92} place={2} metric={metric} />
             <PodiumColumn entry={top3[0]} height={120} place={1} metric={metric} />
@@ -116,19 +125,31 @@ export default function Leaderboard() {
           </View>
         )}
 
-        <View style={styles.listHead}>
-          <Text style={styles.listTitle}>Classement complet</Text>
-          <View style={styles.metricBadge}>
-            <Ionicons name={meta.icon as any} size={12} color={meta.tint} />
-            <Text style={[styles.metricBadgeText, { color: meta.tint }]}>{PERIOD_LABEL[period]} · {meta.label}</Text>
-          </View>
-        </View>
+        {!loading && safe.list.length > 0 && (
+          <>
+            <View style={styles.listHead}>
+              <Text style={styles.listTitle}>Classement complet</Text>
+              <View style={styles.metricBadge}>
+                <Ionicons name={meta.icon as any} size={12} color={meta.tint} />
+                <Text style={[styles.metricBadgeText, { color: meta.tint }]}>{PERIOD_LABEL[period]} · {meta.label}</Text>
+              </View>
+            </View>
 
-        <View style={{ paddingHorizontal: Spacing.lg, gap: 8 }}>
-          {rest.map((r) => (
-            <Row key={r.id} entry={r} metric={metric} />
-          ))}
-        </View>
+            <View style={{ paddingHorizontal: Spacing.lg, gap: 8 }}>
+              {rest.map((r) => (
+                <Row key={r.id} entry={r} metric={metric} />
+              ))}
+            </View>
+          </>
+        )}
+
+        {!loading && safe.list.length === 0 && (
+          <View style={styles.emptyBox}>
+            <Ionicons name="bicycle-outline" size={32} color={Colors.text.muted} />
+            <Text style={styles.emptyTitle}>Pas encore de rideurs</Text>
+            <Text style={styles.emptyDesc}>Soyez le premier à enregistrer un ride dans ce périmètre.</Text>
+          </View>
+        )}
 
         <View style={styles.footerCard}>
           <Text style={styles.footerEmoji}>📣</Text>
@@ -193,6 +214,7 @@ function PodiumColumn({ entry, height, place, metric }: { entry: RankedRider; he
 function Row({ entry, metric }: { entry: RankedRider; metric: Metric }) {
   const isYou = entry.isYou;
   const meta = METRIC_META[metric];
+  const location = entry.city ?? entry.region ?? "Localisation libre";
   return (
     <View style={[styles.row, isYou && styles.rowYou]}>
       <View style={styles.rankPill}>
@@ -205,7 +227,7 @@ function Row({ entry, metric }: { entry: RankedRider; metric: Metric }) {
         <Text style={styles.name}>{entry.name}{isYou && " (vous)"}</Text>
         <View style={styles.metaRow}>
           <Ionicons name="location-outline" size={11} color={Colors.text.muted} />
-          <Text style={styles.metaText}>{entry.city}</Text>
+          <Text style={styles.metaText}>{location}</Text>
           <Text style={styles.metaDot}>·</Text>
           <Ionicons name="ribbon-outline" size={11} color={Colors.text.muted} />
           <Text style={styles.metaText}>{entry.badges} badges</Text>
@@ -294,4 +316,10 @@ const styles = StyleSheet.create({
   footerDesc: { ...Type.bodyXs, color: Colors.text.muted, marginTop: 2 },
   footerBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: Radius.pill, backgroundColor: Colors.brand.forest },
   footerBtnText: { ...Type.bodyXs, color: Colors.text.inverse, fontWeight: "700" },
+
+  loadingBox: { alignItems: "center", paddingVertical: Spacing.xl, gap: 8 },
+  loadingText: { ...Type.bodyXs, color: Colors.text.muted },
+  emptyBox: { alignItems: "center", paddingVertical: Spacing.xl, paddingHorizontal: Spacing.lg, gap: 6 },
+  emptyTitle: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700", marginTop: 4 },
+  emptyDesc: { ...Type.bodyXs, color: Colors.text.muted, textAlign: "center" },
 });

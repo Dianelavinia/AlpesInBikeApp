@@ -7,6 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Circle } from "react-native-svg";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
 import CarbonImpactBoard from "@/components/CarbonImpactBoard";
+import { useCarbonStats } from "@/lib/carbon";
 
 type Donation = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -59,11 +60,12 @@ const TROPHIES: Trophy[] = [
 
 export default function CarbonImpact() {
   const router = useRouter();
+  const { stats } = useCarbonStats();
   const [autoDonate, setAutoDonate] = useState(true);
   const [shareImpact, setShareImpact] = useState(false);
 
-  const co2Saved = 312;
-  const yearlyGoal = 500;
+  const co2Saved = stats.co2Saved;
+  const yearlyGoal = stats.annualGoal;
   const progressPercent = Math.round((co2Saved / yearlyGoal) * 100);
 
   return (
@@ -91,9 +93,9 @@ export default function CarbonImpact() {
                 <Ionicons name="leaf" size={11} color="rgba(255,255,255,0.7)" />
                 <Text style={styles.heroLabel}>Impact 2026</Text>
               </View>
-              <Text style={styles.heroValue}>312 kg</Text>
+              <Text style={styles.heroValue}>{stats.co2Saved} kg</Text>
               <Text style={styles.heroSub}>de CO2 économisés cette saison</Text>
-              <Text style={styles.heroNote}>équivalent 47 trajets voiture évités</Text>
+              <Text style={styles.heroNote}>équivalent {stats.carTripsAvoided} trajets voiture évités</Text>
             </View>
           </View>
           <View style={styles.heroGoal}>
@@ -105,9 +107,9 @@ export default function CarbonImpact() {
         </View>
 
         <View style={styles.miniRow}>
-          <MiniStat icon="car-outline" value="47" label="trajets voiture" />
-          <MiniStat icon="leaf-outline" value="14" label="arbres équivalents" />
-          <MiniStat icon="speedometer-outline" value="1 450" label="km parcourus" />
+          <MiniStat icon="car-outline" value={stats.carTripsAvoided.toString()} label="trajets voiture" />
+          <MiniStat icon="leaf-outline" value={Math.round(stats.co2Saved / 22).toString()} label="arbres équivalents" />
+          <MiniStat icon="speedometer-outline" value={stats.kmRidden.toLocaleString("fr-FR")} label="km parcourus" />
         </View>
 
         <View style={{ marginTop: Spacing.xl }}>
@@ -119,7 +121,7 @@ export default function CarbonImpact() {
             <Text style={styles.sectionLabel}>Convertir mes km en dons</Text>
             <View style={styles.kmBadge}>
               <Ionicons name="bicycle" size={12} color={Colors.brand.orange} />
-              <Text style={styles.kmBadgeText}>1 450 km dispo</Text>
+              <Text style={styles.kmBadgeText}>{stats.kmRidden.toLocaleString("fr-FR")} km dispo</Text>
             </View>
           </View>
           <View style={{ gap: Spacing.md }}>

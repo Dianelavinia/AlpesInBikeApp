@@ -2,19 +2,18 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
-import { getLeaderboard, METRIC_META } from "@/lib/leaderboard";
+import { useLeaderboard, METRIC_META } from "@/lib/leaderboard";
 
 /**
- * Bandeau compact à afficher sur la Home pour montrer rapidement
- * la position du rideur dans le classement mensuel et donner envie
- * de grimper. Tap → écran classement complet avec filtres.
+ * Bandeau compact à afficher sur la Home pour montrer la position
+ * du rideur dans le classement mensuel global et donner envie de grimper.
  */
 
 export default function LeaderboardTeaser() {
   const router = useRouter();
-  const data = getLeaderboard("global", "month", "km");
+  const { data, loading } = useLeaderboard("global", "month", "km");
 
-  if (!data.meScopeRank) return null;
+  if (loading || !data || !data.meScopeRank) return null;
 
   const next = data.list.find((r) => r.rank === Math.max(1, data.meScopeRank! - 1));
   const gap = next ? next.value - data.meValue : 0;
@@ -28,14 +27,12 @@ export default function LeaderboardTeaser() {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>Vous êtes {data.meScopeRank}e ce mois</Text>
-          <Text style={styles.sub}>
-            sur {data.total} rideurs Alpes in Bike
-          </Text>
+          <Text style={styles.sub}>sur {data.total} rideurs Alpes in Bike</Text>
           {gap > 0 && next && (
             <View style={styles.gapRow}>
               <Ionicons name="trending-up" size={11} color={Colors.brand.orange} />
               <Text style={styles.gapText}>
-                {gap} {meta.unit} pour dépasser {next.name.split(" ")[0]}
+                {Math.round(gap)} {meta.unit} pour dépasser {next.name.split(" ")[0]}
               </Text>
             </View>
           )}
