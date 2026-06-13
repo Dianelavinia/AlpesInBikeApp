@@ -1,56 +1,95 @@
-# Welcome to your Expo app 👋
+# Alpes in Bike, app mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App mobile native iOS et Android pour Alpes in Bike, compagnon du site alpesinbike.com.
 
-## Get started
+## Stack
 
-1. Install dependencies
+- **Expo SDK 56** + **Expo Router** (file-based routing)
+- **TypeScript**
+- **Supabase** (auth, base de données, stockage, partagé avec le web)
+- **NativeWind** + **Tailwind**
+- **i18n-js** pour les 6 langues : FR, EN, IT, DE, NL, ES
+- **expo-linear-gradient**, **@expo/vector-icons**, **react-native-svg**
+- **expo-secure-store** pour la session
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Lancer l'app
 
 ```bash
-npm run reset-project
+cd ~/Desktop/AlpesInBikeApp
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Puis ouvre **Expo Go** sur ton iPhone, scanne le QR code, et l'app se lance.
 
-### Other setup steps
+## Variables d'environnement
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Crée un fichier `.env.local` à la racine :
 
-## Learn more
+```
+EXPO_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Sans ces variables, l'app tourne en mode démo avec des données factices.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Structure
 
-## Join the community
+```
+src/
+├── app/                    Expo Router file-based
+│   ├── _layout.tsx
+│   ├── index.tsx           Redirect vers auth ou tabs
+│   ├── (auth)/welcome.tsx  Hero + sign in/up
+│   ├── (tabs)/             Tab navigator
+│   │   ├── home.tsx        Greeting + hero + actions + parcours
+│   │   ├── bikes.tsx       Catalogue filtrable
+│   │   ├── bookings.tsx    Réservations (en cours / à venir / passées)
+│   │   └── profile.tsx     Compte + préférences + support
+│   ├── booking/new.tsx     Wizard 3 étapes en modal
+│   ├── bike/[slug].tsx     Détail vélo
+│   └── sos.tsx             SAV WhatsApp + appel
+├── constants/theme.ts      Design system aligné avec le web
+├── lib/
+│   ├── supabase.ts         Client Supabase avec SecureStore
+│   ├── i18n.ts             6 langues
+│   └── catalog.ts          Modèles de vélos
+```
 
-Join our community of developers creating universal apps.
+## Écrans déjà construits
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- ✅ Welcome avec hero photo + 3 actions
+- ✅ Home avec greeting, hero CTA, booking actif, actions rapides, carrousel parcours
+- ✅ Catalogue avec 4 filtres + cards vélo + prix
+- ✅ Mes réservations 3 onglets
+- ✅ Compte avec sections personnelles, préférences, support, logout
+- ✅ Détail vélo avec hero, tailles, inclus, dispo, CTA
+- ✅ Wizard réservation 3 étapes (cyclistes / logistique / récap)
+- ✅ SOS avec appel direct + WhatsApp
+
+## Roadmap
+
+### V1 MVP (reste 4 à 6 semaines)
+- [ ] Branchement Supabase Auth (magic link + Apple Sign in)
+- [ ] Vraies données depuis Supabase
+- [ ] Push notifications Expo
+- [ ] Téléchargement GPX vers Garmin/Wahoo
+- [ ] Carte interactive Mapbox des sentiers
+- [ ] Météo Open-Meteo
+- [ ] Stripe Mobile SDK
+
+### V2
+- [ ] Espace pro (dashboard flotte hôtel)
+- [ ] App équipe interne (scan QR vélo)
+- [ ] Bluetooth moteur Bosch
+- [ ] Tracker GPS intégré
+
+## Déploiement
+
+```bash
+npx eas build --platform ios
+npx eas build --platform android
+npx eas submit
+```
+
+Compte Expo + EAS requis.
