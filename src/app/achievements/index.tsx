@@ -147,8 +147,21 @@ function ChallengesView() {
 }
 
 function LeaderboardView() {
+  const router = useRouter();
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 12 }}>
+      <Pressable onPress={() => router.push("/leaderboard" as any)} style={styles.fullCtaCard}>
+        <View style={styles.fullCtaIcon}>
+          <Ionicons name="trophy" size={20} color={Colors.brand.orange} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.fullCtaTitle}>Classement complet</Text>
+          <Text style={styles.fullCtaDesc}>Filtrez par âge, genre, région, club ou amis. Suivez 5 critères : km, dénivelé, CO2, rides, points.</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={Colors.text.muted} />
+      </Pressable>
+
+      <Text style={styles.miniLabel}>Aperçu, ce mois en kilomètres</Text>
       <View style={styles.leaderHead}>
         <Pressable style={styles.periodPill}><Text style={styles.periodText}>Ce mois</Text></Pressable>
         <Pressable style={styles.periodPillInactive}><Text style={styles.periodTextInactive}>Année</Text></Pressable>
@@ -234,6 +247,11 @@ const styles = StyleSheet.create({
   partsText: { ...Type.bodyXs, color: Colors.text.muted },
   rewardRow: { flexDirection: "row", alignItems: "center", gap: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: Colors.border.subtle },
   rewardText: { ...Type.bodyXs, color: Colors.brand.orange, flex: 1, fontWeight: "600" },
+  fullCtaCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: Spacing.md, backgroundColor: Colors.bg.card, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.brand.orange },
+  fullCtaIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: "rgba(225,90,35,0.12)", alignItems: "center", justifyContent: "center" },
+  fullCtaTitle: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700" },
+  fullCtaDesc: { ...Type.bodyXs, color: Colors.text.muted, marginTop: 2, lineHeight: 16 },
+  miniLabel: { ...Type.label, color: Colors.text.muted, marginTop: 4 },
   leaderHead: { flexDirection: "row", gap: 6, marginBottom: 6 },
   periodPill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: Radius.pill, backgroundColor: Colors.brand.ink },
   periodText: { ...Type.bodyXs, color: Colors.text.inverse, fontWeight: "700" },

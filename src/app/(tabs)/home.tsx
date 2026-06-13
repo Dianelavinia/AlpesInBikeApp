@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
 import { t } from "@/lib/i18n";
 import CarbonHomeWidget from "@/components/CarbonHomeWidget";
+import LeaderboardTeaser from "@/components/LeaderboardTeaser";
 
 export default function Home() {
   const router = useRouter();
@@ -68,6 +69,8 @@ export default function Home() {
         </View>
 
         <CarbonHomeWidget />
+
+        <LeaderboardTeaser />
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Tous vos outils</Text>
