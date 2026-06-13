@@ -58,9 +58,9 @@ export default function Home() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>{t("home.quickActions")}</Text>
           <View style={styles.grid}>
+            <QuickAction icon="sparkles-outline" label="Planifier un ride" onPress={() => router.push("/plan")} />
+            <QuickAction icon="compass-outline" label="Rides communauté" onPress={() => router.push("/(tabs)/community")} />
             <QuickAction icon="bicycle-outline" label="Voir les vélos" onPress={() => router.push("/(tabs)/bikes")} />
-            <QuickAction icon="map-outline" label="Parcours" onPress={() => {}} />
-            <QuickAction icon="cloudy-outline" label="Météo" onPress={() => {}} />
             <QuickAction icon="logo-whatsapp" label="WhatsApp" tint="#25D366" onPress={() => {}} />
           </View>
         </View>
