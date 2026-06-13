@@ -17,9 +17,14 @@ export default function Home() {
             <Text style={styles.greet}>{t("home.hello")}</Text>
             <Text style={styles.greetName}>Marie</Text>
           </View>
-          <Pressable onPress={() => router.push("/sos")} style={styles.sosBtn}>
-            <Ionicons name="warning" size={18} color={Colors.brand.orange} />
-          </Pressable>
+          <View style={styles.headerRight}>
+            <Pressable onPress={() => router.push("/family")} style={styles.iconBtn}>
+              <Ionicons name="people-outline" size={20} color={Colors.text.primary} />
+            </Pressable>
+            <Pressable onPress={() => router.push("/sos")} style={styles.sosBtn}>
+              <Ionicons name="warning" size={18} color={Colors.brand.orange} />
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.hero}>
@@ -34,34 +39,45 @@ export default function Home() {
           />
           <View style={styles.heroContent}>
             <Text style={styles.heroTitle}>{t("home.heroTitle")}</Text>
-            <Pressable
-              style={({ pressed }) => [styles.heroCta, pressed && { opacity: 0.85 }]}
-              onPress={() => router.push("/booking/new")}
-            >
-              <Text style={styles.heroCtaText}>{t("home.heroCta")}</Text>
-              <Ionicons name="arrow-forward" size={16} color={Colors.text.inverse} />
-            </Pressable>
+            <View style={styles.heroBtns}>
+              <Pressable onPress={() => router.push("/plan")} style={styles.heroCta}>
+                <Ionicons name="sparkles" size={14} color={Colors.text.inverse} />
+                <Text style={styles.heroCtaText}>Planifier un ride</Text>
+              </Pressable>
+              <Pressable onPress={() => router.push("/ride/record")} style={styles.heroCtaSecondary}>
+                <Ionicons name="radio-button-on" size={14} color={Colors.text.inverse} />
+                <Text style={styles.heroCtaText}>Enregistrer</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.statsRow}>
+          <MiniStat icon="speedometer-outline" value="248" unit="km" label="Ce mois" />
+          <MiniStat icon="trending-up-outline" value="3.1k" unit="m" label="Dénivelé" />
+          <MiniStat icon="trophy-outline" value="8" label="Badges" />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Mode actif</Text>
+          <View style={styles.featureGrid}>
+            <FeatureCard icon="people" tone={Colors.brand.forest} label="Famille" desc="3 membres en route" onPress={() => router.push("/family")} />
+            <FeatureCard icon="battery-charging" tone={Colors.brand.orange} label="Assistant VAE" desc="68% · 92 km" onPress={() => router.push("/vae")} />
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{t("home.currentBookingTitle")}</Text>
-          <View style={styles.emptyCard}>
-            <Ionicons name="bicycle-outline" size={32} color={Colors.text.muted} />
-            <Text style={styles.emptyText}>{t("home.noBooking")}</Text>
-            <Pressable onPress={() => router.push("/booking/new")} style={styles.emptyCta}>
-              <Text style={styles.emptyCtaText}>{t("home.noBookingCta")}</Text>
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{t("home.quickActions")}</Text>
-          <View style={styles.grid}>
-            <QuickAction icon="sparkles-outline" label="Planifier un ride" onPress={() => router.push("/plan")} />
-            <QuickAction icon="compass-outline" label="Rides communauté" onPress={() => router.push("/(tabs)/community")} />
-            <QuickAction icon="bicycle-outline" label="Voir les vélos" onPress={() => router.push("/(tabs)/bikes")} />
-            <QuickAction icon="logo-whatsapp" label="WhatsApp" tint="#25D366" onPress={() => {}} />
+          <Text style={styles.sectionLabel}>Tous vos outils</Text>
+          <View style={styles.toolGrid}>
+            <ToolCard icon="compass-outline" label="Rides" onPress={() => router.push("/(tabs)/community")} />
+            <ToolCard icon="bicycle-outline" label="Vélos" onPress={() => router.push("/(tabs)/bikes")} />
+            <ToolCard icon="calendar-outline" label="Réservations" onPress={() => router.push("/(tabs)/bookings")} />
+            <ToolCard icon="alert-circle-outline" label="Signalements" onPress={() => router.push("/reports")} />
+            <ToolCard icon="shield-checkmark-outline" label="Antivol" onPress={() => router.push("/antitheft")} />
+            <ToolCard icon="construct-outline" label="Entretien" onPress={() => router.push("/maintenance")} />
+            <ToolCard icon="trophy-outline" label="Récompenses" onPress={() => router.push("/achievements")} />
+            <ToolCard icon="location-outline" label="Tourisme" onPress={() => router.push("/tourism")} />
+            <ToolCard icon="briefcase-outline" label="Espace Pro" onPress={() => router.push("/pro")} tone="#0369A1" />
           </View>
         </View>
 
@@ -78,13 +94,39 @@ export default function Home() {
   );
 }
 
-function QuickAction({ icon, label, onPress, tint }: { icon: any; label: string; onPress: () => void; tint?: string }) {
+function MiniStat({ icon, value, unit, label }: { icon: any; value: string; unit?: string; label: string }) {
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.qa, pressed && { opacity: 0.7 }]}>
-      <View style={[styles.qaIcon, tint ? { backgroundColor: `${tint}15` } : null]}>
-        <Ionicons name={icon} size={22} color={tint || Colors.brand.orange} />
+    <View style={styles.miniStat}>
+      <Ionicons name={icon} size={16} color={Colors.brand.orange} />
+      <View style={styles.miniStatRow}>
+        <Text style={styles.miniValue}>{value}</Text>
+        {unit && <Text style={styles.miniUnit}>{unit}</Text>}
       </View>
-      <Text style={styles.qaLabel}>{label}</Text>
+      <Text style={styles.miniLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function FeatureCard({ icon, tone, label, desc, onPress }: { icon: any; tone: string; label: string; desc: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.feature, pressed && { opacity: 0.8 }]}>
+      <View style={[styles.featureIcon, { backgroundColor: `${tone}15` }]}>
+        <Ionicons name={icon} size={22} color={tone} />
+      </View>
+      <Text style={styles.featureLabel}>{label}</Text>
+      <Text style={styles.featureDesc}>{desc}</Text>
+    </Pressable>
+  );
+}
+
+function ToolCard({ icon, label, onPress, tone }: { icon: any; label: string; onPress: () => void; tone?: string }) {
+  const color = tone || Colors.brand.orange;
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.tool, pressed && { opacity: 0.7 }]}>
+      <View style={[styles.toolIcon, { backgroundColor: `${color}15` }]}>
+        <Ionicons name={icon} size={20} color={color} />
+      </View>
+      <Text style={styles.toolLabel}>{label}</Text>
     </Pressable>
   );
 }
@@ -107,25 +149,36 @@ const styles = StyleSheet.create({
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: Spacing.lg, paddingTop: Spacing.md, paddingBottom: Spacing.lg },
   greet: { ...Type.bodySm, color: Colors.text.muted },
   greetName: { ...Type.display3, color: Colors.text.primary },
-  sosBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: Colors.bg.card, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: Colors.border.subtle },
-  hero: { marginHorizontal: Spacing.lg, height: 220, borderRadius: Radius.xl, overflow: "hidden", marginBottom: Spacing.xl },
+  headerRight: { flexDirection: "row", gap: 8 },
+  iconBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.bg.card, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: Colors.border.subtle },
+  sosBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.bg.card, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: Colors.border.subtle },
+  hero: { marginHorizontal: Spacing.lg, height: 200, borderRadius: Radius.xl, overflow: "hidden", marginBottom: Spacing.lg },
   heroContent: { flex: 1, justifyContent: "flex-end", padding: Spacing.lg },
-  heroTitle: { ...Type.display3, color: Colors.text.inverse, marginBottom: Spacing.md },
-  heroCta: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", gap: 8, backgroundColor: Colors.brand.orange, paddingHorizontal: 20, paddingVertical: 12, borderRadius: Radius.pill },
-  heroCtaText: { ...Type.bodySm, color: Colors.text.inverse, fontWeight: "600" },
+  heroTitle: { ...Type.display3, color: Colors.text.inverse, marginBottom: Spacing.md, fontSize: 22 },
+  heroBtns: { flexDirection: "row", gap: 8 },
+  heroCta: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: Colors.brand.orange, paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.pill },
+  heroCtaSecondary: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(255,255,255,0.18)", paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.pill, borderWidth: 1, borderColor: "rgba(255,255,255,0.3)" },
+  heroCtaText: { ...Type.bodyXs, color: Colors.text.inverse, fontWeight: "700" },
+  statsRow: { flexDirection: "row", paddingHorizontal: Spacing.lg, gap: 8, marginBottom: Spacing.lg },
+  miniStat: { flex: 1, padding: Spacing.md, backgroundColor: Colors.bg.card, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border.subtle, gap: 4 },
+  miniStatRow: { flexDirection: "row", alignItems: "baseline", gap: 2 },
+  miniValue: { ...Type.display3, color: Colors.text.primary, fontSize: 20 },
+  miniUnit: { ...Type.bodyXs, color: Colors.text.muted },
+  miniLabel: { ...Type.bodyXs, color: Colors.text.muted, fontSize: 11 },
   section: { paddingHorizontal: Spacing.lg, marginBottom: Spacing.xl },
   sectionLabel: { ...Type.label, color: Colors.text.muted, marginBottom: Spacing.md },
-  emptyCard: { backgroundColor: Colors.bg.card, borderRadius: Radius.lg, padding: Spacing.xl, alignItems: "center", borderWidth: 1, borderColor: Colors.border.subtle, gap: Spacing.md },
-  emptyText: { ...Type.body, color: Colors.text.secondary },
-  emptyCta: { backgroundColor: Colors.brand.orange, paddingHorizontal: 20, paddingVertical: 10, borderRadius: Radius.pill },
-  emptyCtaText: { ...Type.bodySm, color: Colors.text.inverse, fontWeight: "600" },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  qa: { flex: 1, minWidth: "47%", backgroundColor: Colors.bg.card, padding: Spacing.md, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border.subtle, flexDirection: "row", alignItems: "center", gap: 12 },
-  qaIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: "rgba(225,90,35,0.1)", alignItems: "center", justifyContent: "center" },
-  qaLabel: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "600", flex: 1 },
-  route: { width: 240, height: 140, borderRadius: 16, overflow: "hidden" },
+  featureGrid: { flexDirection: "row", gap: 10 },
+  feature: { flex: 1, padding: Spacing.md, backgroundColor: Colors.bg.card, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border.subtle, gap: 6 },
+  featureIcon: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  featureLabel: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700", fontSize: 14, marginTop: 4 },
+  featureDesc: { ...Type.bodyXs, color: Colors.text.muted },
+  toolGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  tool: { width: "31%", aspectRatio: 1, padding: Spacing.sm, backgroundColor: Colors.bg.card, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border.subtle, alignItems: "center", justifyContent: "center", gap: 6 },
+  toolIcon: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
+  toolLabel: { ...Type.bodyXs, color: Colors.text.primary, fontWeight: "600", textAlign: "center", fontSize: 11 },
+  route: { width: 220, height: 130, borderRadius: 16, overflow: "hidden" },
   routeImg: { width: "100%", height: "100%" },
   routeText: { position: "absolute", bottom: 12, left: 14, right: 14 },
-  routeTitle: { ...Type.display4, color: Colors.text.inverse, fontSize: 16 },
+  routeTitle: { ...Type.display4, color: Colors.text.inverse, fontSize: 15 },
   routeMeta: { ...Type.bodyXs, color: "rgba(255,255,255,0.85)", marginTop: 2 },
 });
