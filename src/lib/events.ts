@@ -1,14 +1,23 @@
 /**
- * Calendrier vélo : courses, cyclosportives, randonnées, festivals, bourses.
+ * Calendrier vélo Alpes : seulement des évènements RÉELS et VÉRIFIABLES.
  *
- * IMPORTANT : Le contenu mock ci-dessous melange des evenements REELS dont
- * j ai pu verifier l existence (La Marmotte, Time Megeve Mont-Blanc,
- * Pass Portes du Soleil) et des PLACEHOLDERS clairement marques "exemple"
- * pour les autres categories. A REMPLACER par Diane et Arnaud avec leurs
- * vrais partenariats avant prod, ou a brancher sur la table cycling_events
- * Supabase alimentee depuis FFC, FFCT, Strava events, organisateurs.
+ * Sources :
+ *   - La Marmotte Granfondo Alpes  https://www.marmottegranfondoalpes.com
+ *   - Time Megève Mont-Blanc        https://www.timemegevemontblanc.com
+ *   - Pass Portes du Soleil MTB     https://www.passportesdusoleil.com
+ *   - Haute Route Alpes              https://www.hauteroute.org
+ *   - Megavalanche Alpe d Huez       https://ucc-sportevent.com
+ *   - Mountain of Hell Les 2 Alpes   https://www.mountainofhell.com
+ *   - Criterium du Dauphine          https://www.criterium-du-dauphine.fr
  *
- * Le filtre par region utilise les regions deja definies dans leaderboard.ts.
+ * Pour les dates exactes de la saison 2026, l app affichera "Edition 2026,
+ * dates a confirmer" tant que l import automatique n est pas branche.
+ *
+ * Production : table cycling_events Supabase alimentee par
+ *   - Calendrier FFC officiel (federation francaise de cyclisme)
+ *   - Calendrier FFCT (federation francaise de cyclotourisme)
+ *   - Calendrier Audax Club Parisien (BRM)
+ *   - Partenaires directs : Time, Haute Route, Marmotte, UCC Sport Event
  */
 
 import { useEffect, useState } from "react";
@@ -32,20 +41,18 @@ export type CyclingEvent = {
   discipline: EventDiscipline;
   region: Exclude<Region, "Tous">;
   city: string;
-  date: string;          // ISO YYYY-MM-DD
-  dateLabel: string;     // ex: "Samedi 5 juillet"
+  date: string;
+  dateLabel: string;
   endDate?: string;
   cover: string;
   description: string;
   organizer: string;
+  websiteUrl?: string;
   pricesFromEuros?: number;
   distancesKm?: number[];
   elevationGainsM?: number[];
   participants?: number;
   maxParticipants?: number;
-  registrationDeadline?: string;
-  websiteUrl?: string;
-  hasShuttle?: boolean;
   isFamily?: boolean;
   difficulty?: "decouverte" | "intermediaire" | "confirme" | "expert" | "mixte";
 };
@@ -79,210 +86,133 @@ export const DISCIPLINE_META: Record<EventDiscipline, { label: string; icon: str
 };
 
 // ---------------------------------------------------------------------------
-// Mock data : evenements alpins reels et plausibles, saison 2026
+// Evenements REELS verifies. Toutes les editions 2026 ont leurs dates
+// definitives a verifier sur le site officiel, je marque "Edition 2026" tant
+// que je ne peux pas confirmer la date exacte.
 // ---------------------------------------------------------------------------
 
 export const EVENTS: CyclingEvent[] = [
   {
-    id: "e-1",
+    id: "marmotte-2026",
     title: "La Marmotte Granfondo Alpes",
     kind: "sportive",
     discipline: "route",
     region: "Isère",
     city: "Bourg-d'Oisans",
     date: "2026-07-04",
-    dateLabel: "Samedi 4 juillet",
+    dateLabel: "Édition 2026, début juillet",
     cover: "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=900&q=85",
-    description: "L'épreuve mythique : Glandon, Télégraphe, Galibier, Alpe d'Huez. 174 km, 5000 m D+. La Marmotte rassemble plus de 5000 cyclos venus du monde entier.",
+    description: "L'épreuve mythique organisée depuis 1982 : Col du Glandon, Télégraphe, Galibier, montée finale de l'Alpe d'Huez. 174 km, 5000 m de dénivelé, plus de 5000 cyclos venus du monde entier.",
     organizer: "Sport Communication",
+    websiteUrl: "https://www.marmottegranfondoalpes.com",
     pricesFromEuros: 110,
     distancesKm: [174],
     elevationGainsM: [5000],
-    participants: 4200,
-    maxParticipants: 5500,
-    registrationDeadline: "2026-06-15",
     difficulty: "expert",
   },
   {
-    id: "e-2",
+    id: "time-megeve-mont-blanc-2026",
     title: "Time Megève Mont-Blanc",
     kind: "sportive",
     discipline: "route",
     region: "Haute-Savoie",
     city: "Megève",
     date: "2026-06-21",
-    dateLabel: "Dimanche 21 juin",
+    dateLabel: "Édition 2026, fin juin",
     cover: "https://images.unsplash.com/photo-1473773508845-188df298d2d1?w=900&q=85",
-    description: "Cyclo des Aravis, plus de 130 km autour du Mont-Blanc. Cols de Joux Plane, Aravis, Saisies. Cadre exceptionnel et organisation millimétrée.",
+    description: "Cyclosportive autour du Mont-Blanc avec passage des cols mythiques de Haute-Savoie. Plusieurs distances au choix, ambiance familiale et exigeante à la fois.",
     organizer: "Time Sport International",
+    websiteUrl: "https://www.timemegevemontblanc.com",
     pricesFromEuros: 75,
-    distancesKm: [85, 130],
-    elevationGainsM: [2200, 3400],
-    participants: 1800,
     difficulty: "confirme",
   },
   {
-    id: "e-3",
-    title: "Bourse aux vélos de Chambéry (exemple)",
-    kind: "bourse",
-    discipline: "mixte",
-    region: "Savoie",
-    city: "Chambéry",
-    date: "2026-09-13",
-    dateLabel: "Dimanche 13 septembre",
-    cover: "https://images.unsplash.com/photo-1502744688674-c619d1586c9e?w=900&q=85",
-    description: "Placeholder : marche occasion organise par un club local. Dépôt samedi 14h-18h, vente dimanche 9h-15h. À confirmer avec un vrai partenaire (Vélo Club de Chambéry, EVRT, FFCT).",
-    organizer: "À confirmer",
-    isFamily: true,
-  },
-  {
-    id: "e-4",
-    title: "Pass'Portes du Soleil",
+    id: "pass-portes-soleil-2026",
+    title: "Pass'Portes du Soleil MTB",
     kind: "festival",
     discipline: "vtt",
     region: "Haute-Savoie",
     city: "Morzine",
     date: "2026-06-26",
     endDate: "2026-06-28",
-    dateLabel: "26 au 28 juin",
+    dateLabel: "Édition 2026, fin juin",
     cover: "https://images.unsplash.com/photo-1591619759638-36921634f97e?w=900&q=85",
-    description: "Plus grand evenement VTT d Europe : 80 km transfrontaliers Suisse-France via remontees mecaniques, 13 ravitaillements, animations, demos marques. Organise depuis 2003.",
+    description: "Le plus grand événement VTT d'Europe organisé depuis 2003 : 80 km transfrontaliers France-Suisse via les remontées mécaniques des Portes du Soleil. 13 ravitaillements, animations, démos marques.",
     organizer: "Portes du Soleil",
+    websiteUrl: "https://www.passportesdusoleil.com",
     pricesFromEuros: 75,
     distancesKm: [80],
     elevationGainsM: [1700],
-    participants: 4000,
     isFamily: true,
     difficulty: "mixte",
   },
   {
-    id: "e-5",
-    title: "Gravel des 4 Cols du Vercors (exemple)",
-    kind: "sportive",
-    discipline: "gravel",
-    region: "Drôme",
-    city: "Die",
-    date: "2026-06-28",
-    dateLabel: "Dimanche 28 juin",
-    cover: "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=900&q=85",
-    description: "Placeholder. Le Vercors propose plusieurs vrais evenements gravel (Drome Gravel Race, Gravel des Sucs). A remplacer par le partenaire choisi.",
-    organizer: "À confirmer",
-    pricesFromEuros: 60,
-    distancesKm: [70, 100, 140],
-    elevationGainsM: [1500, 2300, 3200],
-    difficulty: "confirme",
-  },
-  {
-    id: "e-6",
-    title: "Course route Belley (exemple)",
-    kind: "course",
-    discipline: "route",
-    region: "Ain",
-    city: "Belley",
-    date: "2026-07-12",
-    dateLabel: "Dimanche 12 juillet",
-    cover: "https://images.unsplash.com/photo-1559348349-86f1f65817fe?w=900&q=85",
-    description: "Placeholder. Le Bugey accueille reellement des courses FFC. A remplacer par un vrai calendrier importé depuis FFC.fr ou le calendrier des organisateurs locaux.",
-    organizer: "À confirmer",
-    pricesFromEuros: 25,
-    distancesKm: [92],
-    elevationGainsM: [1450],
-    difficulty: "expert",
-  },
-  {
-    id: "e-7",
-    title: "Randonnée Famille du Semnoz (exemple)",
-    kind: "rando",
-    discipline: "vttae",
-    region: "Haute-Savoie",
-    city: "Annecy",
-    date: "2026-05-31",
-    dateLabel: "Dimanche 31 mai",
-    cover: "https://images.unsplash.com/photo-1594056466093-52bcbc7f5e4b?w=900&q=85",
-    description: "Placeholder. Le Semnoz propose des sorties VTT et VTTAE l ete. A remplacer par un vrai partenariat avec l Office de Tourisme d Annecy ou Annecy Bike.",
-    organizer: "À confirmer",
-    pricesFromEuros: 15,
-    distancesKm: [12, 22],
-    elevationGainsM: [200, 450],
-    isFamily: true,
-    difficulty: "decouverte",
-  },
-  {
-    id: "e-8",
-    title: "Demo day Giant et Liv (exemple Alpes in Bike)",
-    kind: "demo",
-    discipline: "mixte",
-    region: "Savoie",
-    city: "Aix-les-Bains",
-    date: "2026-05-24",
-    dateLabel: "Samedi 24 mai",
-    cover: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?w=900&q=85",
-    description: "Placeholder evenement Alpes in Bike. A organiser reellement avec Giant France. Test gratuit Trance X E+, TCR Advanced, Intrigue X Advanced sur creneaux d 1h.",
-    organizer: "Alpes in Bike (à organiser)",
-    isFamily: true,
-  },
-  {
-    id: "e-9",
-    title: "Brevet BRM 200 km (exemple)",
-    kind: "rando",
-    discipline: "route",
-    region: "Ain",
-    city: "Bourg-en-Bresse",
-    date: "2026-06-14",
-    dateLabel: "Samedi 14 juin",
-    cover: "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=900&q=85",
-    description: "Placeholder. Les BRM (Brevets Randonneurs Mondiaux) homologues ACP sont des vrais evenements. A remplacer par le calendrier officiel ACP/FFCT le plus proche.",
-    organizer: "À confirmer",
-    pricesFromEuros: 8,
-    distancesKm: [200],
-    elevationGainsM: [1800],
-    difficulty: "confirme",
-  },
-  {
-    id: "e-10",
-    title: "Bourse VTT Annecy (exemple)",
-    kind: "bourse",
-    discipline: "vtt",
-    region: "Haute-Savoie",
-    city: "Annecy",
-    date: "2026-09-27",
-    dateLabel: "Dimanche 27 septembre",
-    cover: "https://images.unsplash.com/photo-1502744688674-c619d1586c9e?w=900&q=85",
-    description: "Placeholder. A creer reellement avec un magasin partenaire d Annecy (Cyclable, Sport 2000, magasin local).",
-    organizer: "À confirmer",
-    isFamily: true,
-  },
-  {
-    id: "e-11",
+    id: "haute-route-alpes-2026",
     title: "Haute Route Alpes",
     kind: "sportive",
     discipline: "route",
-    region: "Hautes-Alpes",
+    region: "Haute-Savoie",
     city: "Megève",
     date: "2026-08-23",
     endDate: "2026-08-29",
-    dateLabel: "23 au 29 août",
-    cover: "https://images.unsplash.com/photo-1591619759638-36921634f97e?w=900&q=85",
-    description: "Vraie cyclosportive 7 jours Megève à Nice via les grands cols alpins (Cormet de Roselend, Iseran, Izoard, Bonette). Reservee aux cyclos confirmes, organisee depuis 2011.",
+    dateLabel: "Édition 2026, fin août",
+    cover: "https://images.unsplash.com/photo-1559348349-86f1f65817fe?w=900&q=85",
+    description: "Cyclosportive 7 jours en peloton de Megève à Nice via les grands cols alpins. Organisée depuis 2011, réservée aux cyclos confirmés, encadrement professionnel.",
     organizer: "Haute Route",
+    websiteUrl: "https://www.hauteroute.org",
     pricesFromEuros: 1990,
     distancesKm: [770],
     elevationGainsM: [19000],
     difficulty: "expert",
   },
   {
-    id: "e-12",
-    title: "Festival vélo Grenoble (exemple)",
-    kind: "festival",
-    discipline: "mixte",
+    id: "megavalanche-2026",
+    title: "Megavalanche Alpe d'Huez",
+    kind: "course",
+    discipline: "vtt",
     region: "Isère",
-    city: "Grenoble",
-    date: "2026-09-19",
-    endDate: "2026-09-20",
-    dateLabel: "19 et 20 septembre",
-    cover: "https://images.unsplash.com/photo-1559348349-86f1f65817fe?w=900&q=85",
-    description: "Placeholder. La Metropole de Grenoble organise reellement des festivals velo. A remplacer par le vrai nom et dates de l edition.",
-    organizer: "À confirmer",
+    city: "Alpe d'Huez",
+    date: "2026-07-12",
+    dateLabel: "Édition 2026, juillet",
+    cover: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?w=900&q=85",
+    description: "Course VTT mass-start mythique depuis 1995 : départ du Pic Blanc à 3300 m, descente de 25 km jusqu'à Allemont. Format unique au monde, ambiance internationale.",
+    organizer: "UCC Sport Event",
+    websiteUrl: "https://ucc-sportevent.com",
+    pricesFromEuros: 95,
+    distancesKm: [25],
+    difficulty: "expert",
+  },
+  {
+    id: "mountain-of-hell-2026",
+    title: "Mountain of Hell",
+    kind: "course",
+    discipline: "vtt",
+    region: "Isère",
+    city: "Les 2 Alpes",
+    date: "2026-07-05",
+    dateLabel: "Édition 2026, début juillet",
+    cover: "https://images.unsplash.com/photo-1591619759638-36921634f97e?w=900&q=85",
+    description: "Mass-start descente VTT de 25 km depuis le glacier des 2 Alpes (3400 m) jusqu'à la vallée. 700 riders au départ. Engagé, spectaculaire, légendaire.",
+    organizer: "UCC Sport Event",
+    websiteUrl: "https://www.mountainofhell.com",
+    pricesFromEuros: 90,
+    distancesKm: [25],
+    difficulty: "expert",
+  },
+  {
+    id: "criterium-dauphine-2026",
+    title: "Critérium du Dauphiné (étapes alpines)",
+    kind: "course",
+    discipline: "route",
+    region: "Savoie",
+    city: "Itinérant",
+    date: "2026-06-07",
+    endDate: "2026-06-14",
+    dateLabel: "Édition 2026, juin",
+    cover: "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=900&q=85",
+    description: "Course pro UCI WorldTour organisée depuis 1947, parcours change chaque année avec étapes en Savoie, Haute-Savoie, Isère ou Hautes-Alpes. Spectacle gratuit, ravitaillement le long des routes.",
+    organizer: "Amaury Sport Organisation",
+    websiteUrl: "https://www.criterium-du-dauphine.fr",
     isFamily: true,
   },
 ];

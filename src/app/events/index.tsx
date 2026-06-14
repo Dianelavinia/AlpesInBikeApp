@@ -115,15 +115,41 @@ export default function Events() {
         {list.length === 0 ? (
           <View style={styles.emptyBox}>
             <Ionicons name="calendar-outline" size={32} color={Colors.text.muted} />
-            <Text style={styles.emptyTitle}>Aucun événement</Text>
-            <Text style={styles.emptyDesc}>Élargissez la région ou changez de catégorie.</Text>
+            <Text style={styles.emptyTitle}>
+              {kind === "bourse" ? "Pas encore de bourse référencée" :
+               kind === "demo" ? "Pas encore de demo day référencé" :
+               kind === "rando" ? "Pas encore de randonnée référencée" :
+               kind === "festival" ? "Pas encore de festival référencé" :
+               "Aucun événement dans cette catégorie"}
+            </Text>
+            <Text style={styles.emptyDesc}>
+              On ne référence que des événements vérifiés. Vous en connaissez un ? Aidez-nous à enrichir la liste.
+            </Text>
+            <Pressable style={styles.suggestBtn}>
+              <Ionicons name="add-circle-outline" size={15} color={Colors.brand.orange} />
+              <Text style={styles.suggestText}>Suggérer un événement</Text>
+            </Pressable>
           </View>
         ) : (
-          <View style={{ paddingHorizontal: Spacing.lg, gap: 14 }}>
-            {list.map((e) => (
-              <EventCard key={e.id} event={e} />
-            ))}
-          </View>
+          <>
+            <View style={{ paddingHorizontal: Spacing.lg, gap: 14 }}>
+              {list.map((e) => (
+                <EventCard key={e.id} event={e} />
+              ))}
+            </View>
+            <View style={styles.suggestCard}>
+              <View style={styles.suggestIcon}>
+                <Ionicons name="megaphone-outline" size={18} color={Colors.brand.orange} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.suggestCardTitle}>Un événement manque ?</Text>
+                <Text style={styles.suggestCardDesc}>On ne liste que des événements vérifiés. Suggérez-nous un partenaire, une bourse locale, une cyclosportive.</Text>
+              </View>
+              <Pressable style={styles.suggestBtnSmall}>
+                <Ionicons name="arrow-forward" size={14} color={Colors.text.inverse} />
+              </Pressable>
+            </View>
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -295,7 +321,15 @@ const styles = StyleSheet.create({
   cta: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 12, borderRadius: Radius.pill, backgroundColor: Colors.brand.orange },
   ctaText: { ...Type.bodySm, color: Colors.text.inverse, fontWeight: "700", fontSize: 14 },
 
-  emptyBox: { alignItems: "center", paddingVertical: Spacing.xl, paddingHorizontal: Spacing.lg, gap: 6 },
-  emptyTitle: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700", marginTop: 4 },
-  emptyDesc: { ...Type.bodyXs, color: Colors.text.muted, textAlign: "center" },
+  emptyBox: { alignItems: "center", paddingVertical: Spacing.xl, paddingHorizontal: Spacing.lg, gap: 8 },
+  emptyTitle: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700", marginTop: 4, textAlign: "center" },
+  emptyDesc: { ...Type.bodyXs, color: Colors.text.muted, textAlign: "center", lineHeight: 17, paddingHorizontal: Spacing.md },
+  suggestBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 9, borderRadius: Radius.pill, borderWidth: 1, borderColor: Colors.brand.orange, marginTop: 8 },
+  suggestText: { ...Type.bodySm, color: Colors.brand.orange, fontWeight: "700", fontSize: 13 },
+
+  suggestCard: { flexDirection: "row", alignItems: "center", gap: 12, marginHorizontal: Spacing.lg, marginTop: Spacing.lg, padding: Spacing.md, borderRadius: Radius.md, backgroundColor: Colors.bg.elevated, borderWidth: 1, borderColor: Colors.border.subtle },
+  suggestIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(225,90,35,0.12)", alignItems: "center", justifyContent: "center" },
+  suggestCardTitle: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700" },
+  suggestCardDesc: { ...Type.bodyXs, color: Colors.text.muted, marginTop: 2, lineHeight: 16 },
+  suggestBtnSmall: { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.brand.orange, alignItems: "center", justifyContent: "center" },
 });
