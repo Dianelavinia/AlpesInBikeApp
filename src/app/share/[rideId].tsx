@@ -37,6 +37,7 @@ export default function ShareRide() {
     durationMin: activity.stats.durationMin,
     avgSpeed: activity.stats.avgSpeed,
     date: activity.date,
+    routeCoordinates: activity.routeCoordinates,
   };
 
   const PREVIEW_WIDTH = format === "story" ? 220 : format === "square" ? 280 : 320;

@@ -66,21 +66,71 @@ export const ALPES_PHOTOS: { id: string; url: string; label: string }[] = [
   { id: "p8", url: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?w=900&q=85", label: "Vélo au sommet" },
 ];
 
-/** Genere un trace GPS synthetique pour la preview. */
+/**
+ * Projette une polyline GPS [lat, lng] en SVG path qui rentre dans le canvas
+ * avec marges. La projection respecte le ratio terrain (cos lat correction)
+ * pour que le trace soit fidele au parcours reel sans deformation.
+ */
+export function projectRouteToPath(
+  coords: [number, number][] | undefined,
+  width: number,
+  height: number,
+  padding = 0.15,
+): { path: string; start: [number, number]; end: [number, number] } | null {
+  if (!coords || coords.length < 2) return null;
+
+  // Bounding box
+  let minLat = coords[0][0], maxLat = coords[0][0];
+  let minLng = coords[0][1], maxLng = coords[0][1];
+  for (const [lat, lng] of coords) {
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+    if (lng < minLng) minLng = lng;
+    if (lng > maxLng) maxLng = lng;
+  }
+
+  // Correction longitude pour ne pas etirer aux hautes latitudes
+  const meanLat = (minLat + maxLat) / 2;
+  const lngScale = Math.cos((meanLat * Math.PI) / 180);
+  const spanLat = Math.max(0.0001, maxLat - minLat);
+  const spanLng = Math.max(0.0001, (maxLng - minLng) * lngScale);
+
+  const padX = width * padding;
+  const padY = height * padding;
+  const availW = width - 2 * padX;
+  const availH = height - 2 * padY;
+  const scale = Math.min(availW / spanLng, availH / spanLat);
+  const drawnW = spanLng * scale;
+  const drawnH = spanLat * scale;
+  const offsetX = padX + (availW - drawnW) / 2;
+  const offsetY = padY + (availH - drawnH) / 2;
+
+  const project = ([lat, lng]: [number, number]): [number, number] => {
+    const x = offsetX + (lng - minLng) * lngScale * scale;
+    // Lat inversee car en SVG y grandit vers le bas
+    const y = offsetY + (maxLat - lat) * scale;
+    return [x, y];
+  };
+
+  const points = coords.map(project);
+  const path = points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`)
+    .join(" ");
+  return { path, start: points[0], end: points[points.length - 1] };
+}
+
+/** Fallback synthetique si la polyline GPS est absente (rare). */
 export function generateRoutePath(seed: number, width: number, height: number): string {
   const points: [number, number][] = [];
   const cx = width / 2;
   const cy = height / 2;
   const baseR = Math.min(width, height) * 0.28;
-  const N = 32;
+  const N = 64;
   for (let i = 0; i <= N; i++) {
     const t = (i / N) * Math.PI * 2;
-    const wobble1 = Math.sin(t * 3 + seed) * 0.15;
-    const wobble2 = Math.cos(t * 5 + seed * 1.3) * 0.08;
-    const r = baseR * (1 + wobble1 + wobble2);
-    const x = cx + Math.cos(t) * r;
-    const y = cy + Math.sin(t) * r * 0.9;
-    points.push([x, y]);
+    const wobble = Math.sin(t * 3 + seed) * 0.15 + Math.cos(t * 5 + seed * 1.3) * 0.08;
+    const r = baseR * (1 + wobble);
+    points.push([cx + Math.cos(t) * r, cy + Math.sin(t) * r * 0.9]);
   }
   return points.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
 }

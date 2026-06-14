@@ -32,7 +32,36 @@ export type Activity = {
   isLiked?: boolean;
   description?: string;
   photos?: string[];
+  /** Polyline GPS reelle du ride : tableau [lat, lng]. En prod, vient de la
+   * table rides.route_coords stocke en JSONB Supabase apres enregistrement. */
+  routeCoordinates?: [number, number][];
 };
+
+/**
+ * Genere une polyline GPS plausible autour d un point central pour les mocks.
+ * En prod, les vraies coordonnees viennent du tracker GPS pendant le ride.
+ */
+function makeRoute(center: [number, number], radiusKm: number, seed: number, points = 120): [number, number][] {
+  const [lat, lng] = center;
+  // 1 deg lat ~ 111 km, 1 deg lng ~ 111 * cos(lat)
+  const latPerKm = 1 / 111;
+  const lngPerKm = 1 / (111 * Math.cos((lat * Math.PI) / 180));
+  const coords: [number, number][] = [];
+  for (let i = 0; i <= points; i++) {
+    const t = (i / points) * Math.PI * 2;
+    // Forme alpine sinueuse : boucle de base + 3 harmoniques
+    const r = radiusKm * (
+      1 +
+      Math.sin(t * 3 + seed) * 0.2 +
+      Math.sin(t * 7 + seed * 2.1) * 0.08 +
+      Math.cos(t * 11 + seed * 1.3) * 0.04
+    );
+    const dy = Math.cos(t) * r * latPerKm;
+    const dx = Math.sin(t) * r * lngPerKm * 0.85;
+    coords.push([lat + dy, lng + dx]);
+  }
+  return coords;
+}
 
 export const DIFFICULTY_META: Record<Difficulty, { label: string; color: string; bg: string }> = {
   facile: { label: "Facile", color: "#0D4F3D", bg: "rgba(13,79,61,0.12)" },
@@ -59,6 +88,8 @@ export const ACTIVITIES: Activity[] = [
     comments: 6,
     description: "Première sortie de la saison, vue Mont Blanc au sommet. Magique.",
     photos: ["https://images.unsplash.com/photo-1591028889197-3488e003481a?w=800&q=85", "https://images.unsplash.com/photo-1660726373520-6c893e1b3995?w=800&q=85"],
+    // Boucle autour du Revard, Massif des Bauges
+    routeCoordinates: makeRoute([45.6536, 5.9789], 5.5, 1.2),
   },
   {
     id: "a-002",
@@ -77,6 +108,8 @@ export const ACTIVITIES: Activity[] = [
     comments: 12,
     description: "Le Lac Robert valait la suée. Descente technique de folie.",
     photos: ["https://images.unsplash.com/photo-1600818596647-9d5318c20a8a?w=800&q=85"],
+    // Belledonne single track depuis le Lac Robert, allure technique
+    routeCoordinates: makeRoute([45.1167, 5.8833], 4.2, 3.7, 140),
   },
   {
     id: "a-003",
@@ -94,6 +127,8 @@ export const ACTIVITIES: Activity[] = [
     likes: 18,
     comments: 4,
     description: "Pause baignade à Sevrier, gaufres à Saint-Jorioz. Les enfants ont adoré.",
+    // Voie verte du lac Annecy, boucle douce
+    routeCoordinates: makeRoute([45.8326, 6.1750], 3.6, 5.4, 100),
   },
   {
     id: "a-004",
@@ -111,6 +146,8 @@ export const ACTIVITIES: Activity[] = [
     likes: 31,
     comments: 8,
     description: "Nouveau PR sur la montée. Descente, jamais aussi vite.",
+    // Col du Granier depuis Chambery, montee chrono
+    routeCoordinates: makeRoute([45.4750, 5.9333], 5.0, 7.1, 130),
   },
   {
     id: "a-005",
@@ -128,6 +165,8 @@ export const ACTIVITIES: Activity[] = [
     likes: 22,
     comments: 5,
     description: "Le grand classique. Pause à Hautecombe, le coucher de soleil par dessus la dent du chat.",
+    // Tour du Lac du Bourget, boucle complete
+    routeCoordinates: makeRoute([45.7333, 5.8667], 7.5, 9.3, 160),
   },
 ];
 
