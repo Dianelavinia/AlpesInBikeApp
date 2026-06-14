@@ -20,6 +20,9 @@ import {
   type Level,
   type Vibe,
 } from "@/lib/buddies";
+import { useMyTrust, canDo, getBuddyTrust, type GatedAction } from "@/lib/trust";
+import TrustBadge from "@/components/TrustBadge";
+import TrustGateSheet from "@/components/TrustGateSheet";
 
 const TABS = [
   { id: "nearby",   label: "Près de moi",   icon: "people-outline" as const },
@@ -34,9 +37,17 @@ export default function Buddies() {
   const [level, setLevel] = useState<Level | "all">("all");
   const [vibe, setVibe] = useState<Vibe | "all">("all");
   const [radius, setRadius] = useState<number>(50);
+  const [gate, setGate] = useState<GatedAction | null>(null);
 
   const { list } = useBuddies({ bikeKind, level, vibe, maxDistanceKm: radius });
+  const { trust } = useMyTrust();
   const pending = BUDDY_REQUESTS.filter((r) => r.status === "pending").length;
+
+  function tryAction(action: GatedAction) {
+    if (canDo(action, trust.level)) return true;
+    setGate(action);
+    return false;
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -66,6 +77,16 @@ export default function Buddies() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+        <View style={styles.trustBanner}>
+          <Ionicons name="shield-checkmark" size={14} color={Colors.brand.forest} />
+          <Text style={styles.trustBannerText} numberOfLines={2}>
+            Sécurité : seuls les profils avec identité vérifiée peuvent organiser des sorties.
+          </Text>
+          <Pressable onPress={() => router.push("/verify" as any)}>
+            <Text style={styles.trustBannerLink}>Voir</Text>
+          </Pressable>
+        </View>
+
         {tab === "nearby" && (
           <NearbyView
             list={list}
@@ -73,11 +94,19 @@ export default function Buddies() {
             level={level} setLevel={setLevel}
             vibe={vibe} setVibe={setVibe}
             radius={radius} setRadius={setRadius}
+            tryAction={tryAction}
           />
         )}
-        {tab === "groups" && <GroupsView list={GROUP_RIDES} />}
+        {tab === "groups" && <GroupsView list={GROUP_RIDES} tryAction={tryAction} />}
         {tab === "requests" && <RequestsView list={BUDDY_REQUESTS} />}
       </ScrollView>
+
+      <TrustGateSheet
+        visible={gate !== null}
+        action={gate ?? "joinGroup"}
+        currentLevel={trust.level}
+        onClose={() => setGate(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -92,6 +121,7 @@ function NearbyView({
   level, setLevel,
   vibe, setVibe,
   radius, setRadius,
+  tryAction,
 }: any) {
   const radii = [10, 25, 50, 100];
   return (
@@ -145,16 +175,17 @@ function NearbyView({
         </View>
       ) : (
         <View style={{ paddingHorizontal: Spacing.lg, gap: 10 }}>
-          {list.map((b: Buddy) => <BuddyCard key={b.id} buddy={b} />)}
+          {list.map((b: Buddy) => <BuddyCard key={b.id} buddy={b} tryAction={tryAction} />)}
         </View>
       )}
     </View>
   );
 }
 
-function BuddyCard({ buddy }: { buddy: Buddy }) {
+function BuddyCard({ buddy, tryAction }: { buddy: Buddy; tryAction: (a: GatedAction) => boolean }) {
   const lvl = LEVEL_META[buddy.level];
   const pc = PACE_META[buddy.pace];
+  const buddyTrust = getBuddyTrust(buddy.id);
   return (
     <View style={styles.buddyCard}>
       <View style={styles.buddyHead}>
@@ -164,6 +195,7 @@ function BuddyCard({ buddy }: { buddy: Buddy }) {
         <View style={{ flex: 1 }}>
           <View style={styles.nameRow}>
             <Text style={styles.buddyName}>{buddy.name}</Text>
+            <TrustBadge level={buddyTrust} size="sm" />
             {buddy.isFriend && (
               <View style={styles.friendBadge}>
                 <Ionicons name="checkmark" size={10} color={Colors.brand.forest} />
@@ -201,6 +233,7 @@ function BuddyCard({ buddy }: { buddy: Buddy }) {
           <FootStat icon="language-outline" text={buddy.languages.join(" ")} />
         </View>
         <Pressable
+          onPress={() => tryAction("inviteBuddy")}
           style={[styles.inviteBtn, buddy.alreadyInvited && { backgroundColor: Colors.bg.elevated }]}
           disabled={buddy.alreadyInvited}
         >
@@ -222,31 +255,35 @@ function BuddyCard({ buddy }: { buddy: Buddy }) {
 // GROUPS : sorties à rejoindre
 // ---------------------------------------------------------------------------
 
-function GroupsView({ list }: { list: GroupRide[] }) {
+function GroupsView({ list, tryAction }: { list: GroupRide[]; tryAction: (a: GatedAction) => boolean }) {
   return (
     <View style={{ paddingHorizontal: Spacing.lg, paddingTop: Spacing.md, gap: 14 }}>
-      <View style={styles.createCard}>
+      <Pressable
+        onPress={() => tryAction("organizeGroup")}
+        style={({ pressed }) => [styles.createCard, pressed && { opacity: 0.92 }]}
+      >
         <View style={styles.createIcon}>
-          <Ionicons name="add-circle-outline" size={20} color={Colors.brand.orange} />
+          <Ionicons name="shield-checkmark" size={20} color={Colors.brand.orange} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.createTitle}>Organiser ma sortie</Text>
-          <Text style={styles.createDesc}>Proposez un parcours, fixez date, allure, niveau, on trouve les rideurs.</Text>
+          <Text style={styles.createDesc}>Vérification d'identité requise. Une fois fait, vous pouvez proposer des sorties illimitées.</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={Colors.text.muted} />
-      </View>
+      </Pressable>
 
       {list.map((g) => (
-        <GroupCard key={g.id} g={g} />
+        <GroupCard key={g.id} g={g} tryAction={tryAction} />
       ))}
     </View>
   );
 }
 
-function GroupCard({ g }: { g: GroupRide }) {
+function GroupCard({ g, tryAction }: { g: GroupRide; tryAction: (a: GatedAction) => boolean }) {
   const lvl = LEVEL_META[g.difficulty];
   const vb = VIBE_META[g.vibe];
   const remaining = g.maxParticipants - g.participants.length - 1;
+  const organizerTrust = getBuddyTrust(g.organizer.id);
   return (
     <View style={styles.groupCard}>
       <ImageBackground source={{ uri: g.cover }} style={styles.groupCover} imageStyle={{ borderRadius: 16 }}>
@@ -284,7 +321,10 @@ function GroupCard({ g }: { g: GroupRide }) {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.organizerLabel}>Organisé par</Text>
-            <Text style={styles.organizerName}>{g.organizer.name}</Text>
+            <View style={styles.organizerNameRow}>
+              <Text style={styles.organizerName}>{g.organizer.name}</Text>
+              <TrustBadge level={organizerTrust} size="sm" />
+            </View>
           </View>
           <View style={styles.spotsBadge}>
             <Ionicons name="people-outline" size={12} color={Colors.brand.forest} />
@@ -292,7 +332,7 @@ function GroupCard({ g }: { g: GroupRide }) {
           </View>
         </View>
 
-        <Pressable style={styles.joinBtn}>
+        <Pressable onPress={() => tryAction("joinGroup")} style={styles.joinBtn}>
           <Ionicons name="add-circle-outline" size={16} color={Colors.text.inverse} />
           <Text style={styles.joinText}>Rejoindre la sortie</Text>
         </Pressable>
@@ -417,6 +457,9 @@ const styles = StyleSheet.create({
   headBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
   title: { ...Type.display3, color: Colors.text.primary, fontSize: 18 },
 
+  trustBanner: { flexDirection: "row", alignItems: "center", gap: 8, marginHorizontal: Spacing.lg, padding: 10, borderRadius: Radius.sm, backgroundColor: "rgba(13,79,61,0.06)", borderWidth: 1, borderColor: "rgba(13,79,61,0.2)", marginBottom: Spacing.sm },
+  trustBannerText: { flex: 1, ...Type.bodyXs, color: Colors.brand.forest, fontSize: 11.5, lineHeight: 15 },
+  trustBannerLink: { ...Type.bodyXs, color: Colors.brand.orange, fontWeight: "700", fontSize: 11.5 },
   tabs: { flexDirection: "row", paddingHorizontal: Spacing.lg, gap: 0, borderBottomWidth: 1, borderBottomColor: Colors.border.subtle, marginBottom: Spacing.md },
   tab: { flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 5, paddingVertical: 12, borderBottomWidth: 2, borderBottomColor: "transparent" },
   tabActive: { borderBottomColor: Colors.brand.orange },
@@ -489,6 +532,7 @@ const styles = StyleSheet.create({
   smAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.brand.forest, alignItems: "center", justifyContent: "center" },
   smAvatarText: { ...Type.bodyXs, color: Colors.text.inverse, fontWeight: "700", fontSize: 11 },
   organizerLabel: { ...Type.bodyXs, color: Colors.text.muted, fontSize: 10 },
+  organizerNameRow: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" },
   organizerName: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700", fontSize: 13 },
   spotsBadge: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 9, paddingVertical: 4, borderRadius: Radius.pill, backgroundColor: "rgba(13,79,61,0.1)" },
   spotsText: { ...Type.bodyXs, color: Colors.brand.forest, fontWeight: "700", fontSize: 11 },
