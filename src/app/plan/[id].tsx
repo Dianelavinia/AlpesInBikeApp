@@ -110,7 +110,7 @@ export default function RouteDetail() {
           <Ionicons name="download-outline" size={20} color={Colors.text.primary} />
         </Pressable>
         <Pressable
-          onPress={() => router.replace("/ride/record")}
+          onPress={() => router.push(`/start/${route.id}` as any)}
           style={({ pressed }) => [styles.startBtn, pressed && { opacity: 0.85 }]}
         >
           <Ionicons name="play" size={18} color={Colors.text.inverse} />

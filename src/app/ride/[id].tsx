@@ -108,7 +108,7 @@ export default function RideDetail() {
             <Text style={styles.actionText}>{ride.comments}</Text>
           </Pressable>
         </View>
-        <Pressable onPress={() => router.push("/booking/new")} style={({ pressed }) => [styles.refaire, pressed && { opacity: 0.85 }]}>
+        <Pressable onPress={() => router.push(`/start/${ride.id}` as any)} style={({ pressed }) => [styles.refaire, pressed && { opacity: 0.85 }]}>
           <Text style={styles.refaireText}>Refaire ce parcours</Text>
           <Ionicons name="arrow-forward" size={16} color={Colors.text.inverse} />
         </Pressable>
