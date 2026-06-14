@@ -24,7 +24,7 @@ export default function RideDetail() {
             <Pressable onPress={() => router.back()} style={styles.headBtn}>
               <Ionicons name="chevron-back" size={22} color={Colors.text.inverse} />
             </Pressable>
-            <Pressable style={styles.headBtn}>
+            <Pressable onPress={() => router.push(`/share/${ride.id}` as any)} style={styles.headBtn}>
               <Ionicons name="share-outline" size={20} color={Colors.text.inverse} />
             </Pressable>
           </View>

@@ -124,7 +124,7 @@ function ActivityCard({ activity, onPress }: { activity: Activity; onPress: () =
             <Text style={styles.footerText}>{activity.comments}</Text>
           </Pressable>
         </View>
-        <Pressable style={styles.iconBtn}>
+        <Pressable onPress={() => router.push(`/share/${activity.id}` as any)} style={styles.iconBtn}>
           <Ionicons name="share-social-outline" size={18} color={Colors.text.secondary} />
         </Pressable>
       </View>
