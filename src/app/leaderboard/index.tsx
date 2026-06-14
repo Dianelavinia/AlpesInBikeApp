@@ -55,7 +55,9 @@ export default function Leaderboard() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.heroCard}>
           <LinearGradient colors={[Colors.brand.forest, Colors.brand.forestDark]} style={StyleSheet.absoluteFill} />
-          <Text style={styles.heroEmoji}>{motivation.emoji}</Text>
+          <View style={styles.heroIconBubble}>
+            <Ionicons name={motivation.icon as any} size={22} color={Colors.text.inverse} />
+          </View>
           <Text style={styles.heroTitle}>{motivation.title}</Text>
           <Text style={styles.heroBody}>{motivation.body}</Text>
           <View style={styles.heroDivider} />
@@ -152,7 +154,9 @@ export default function Leaderboard() {
         )}
 
         <View style={styles.footerCard}>
-          <Text style={styles.footerEmoji}>📣</Text>
+          <View style={styles.footerIcon}>
+            <Ionicons name="person-add-outline" size={20} color={Colors.brand.forest} />
+          </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.footerTitle}>Invitez vos amis à ride</Text>
             <Text style={styles.footerDesc}>Plus on est nombreux, plus la motivation grimpe.</Text>
@@ -255,7 +259,7 @@ const styles = StyleSheet.create({
   title: { ...Type.display3, color: Colors.text.primary, fontSize: 18 },
 
   heroCard: { marginHorizontal: Spacing.lg, padding: Spacing.lg, borderRadius: Radius.lg, overflow: "hidden", alignItems: "center" },
-  heroEmoji: { fontSize: 32 },
+  heroIconBubble: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.18)", alignItems: "center", justifyContent: "center" },
   heroTitle: { ...Type.display3, color: Colors.text.inverse, fontSize: 20, marginTop: 4, textAlign: "center" },
   heroBody: { ...Type.bodySm, color: "rgba(255,255,255,0.88)", textAlign: "center", marginTop: 6, paddingHorizontal: 12, lineHeight: 19 },
   heroDivider: { width: "100%", height: 1, backgroundColor: "rgba(255,255,255,0.15)", marginVertical: Spacing.md },
@@ -311,7 +315,7 @@ const styles = StyleSheet.create({
   rowValUnit: { ...Type.bodyXs, color: Colors.text.muted, fontSize: 10 },
 
   footerCard: { marginHorizontal: Spacing.lg, marginTop: Spacing.xl, padding: Spacing.md, borderRadius: Radius.md, backgroundColor: "rgba(13,79,61,0.06)", borderWidth: 1, borderColor: "rgba(13,79,61,0.18)", flexDirection: "row", alignItems: "center", gap: 12 },
-  footerEmoji: { fontSize: 28 },
+  footerIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(13,79,61,0.14)", alignItems: "center", justifyContent: "center" },
   footerTitle: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700" },
   footerDesc: { ...Type.bodyXs, color: Colors.text.muted, marginTop: 2 },
   footerBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: Radius.pill, backgroundColor: Colors.brand.forest },

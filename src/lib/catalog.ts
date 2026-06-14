@@ -16,7 +16,10 @@ export type BikeModel = {
   sizes: string[];
   available: number;
   color: string;
-  emoji: string;
+  /** Nom d'icône Ionicons. À remplacer par les vraies photos issues du site quand dispo. */
+  icon: string;
+  /** Photo officielle Alpes in Bike (à remplir depuis le site). */
+  image?: string;
 };
 
 export const BIKES: BikeModel[] = [
@@ -31,7 +34,7 @@ export const BIKES: BikeModel[] = [
     sizes: ["S", "M", "L", "XL"],
     available: 12,
     color: "#E15A23",
-    emoji: "🚵",
+    icon: "bicycle",
   },
   {
     slug: "liv-intrigue-x",
@@ -44,7 +47,7 @@ export const BIKES: BikeModel[] = [
     sizes: ["XS", "S", "M", "L"],
     available: 6,
     color: "#0D4F3D",
-    emoji: "🚵‍♀️",
+    icon: "bicycle",
   },
   {
     slug: "marin-rift-zone",
@@ -57,7 +60,7 @@ export const BIKES: BikeModel[] = [
     sizes: ["S", "M", "L", "XL"],
     available: 5,
     color: "#4B916D",
-    emoji: "🚴",
+    icon: "bicycle-outline",
   },
   {
     slug: "woom-up-5",
@@ -70,7 +73,7 @@ export const BIKES: BikeModel[] = [
     sizes: ["S", "M"],
     available: 4,
     color: "#F6B595",
-    emoji: "🚲",
+    icon: "bicycle-outline",
   },
   {
     slug: "woom-explore-5",
@@ -83,7 +86,7 @@ export const BIKES: BikeModel[] = [
     sizes: ["S", "M"],
     available: 8,
     color: "#B8431A",
-    emoji: "🚲",
+    icon: "bicycle-outline",
   },
   {
     slug: "giant-tcr",
@@ -96,6 +99,6 @@ export const BIKES: BikeModel[] = [
     sizes: ["M", "L"],
     available: 2,
     color: "#0A0A0A",
-    emoji: "🚴‍♂️",
+    icon: "bicycle",
   },
 ];

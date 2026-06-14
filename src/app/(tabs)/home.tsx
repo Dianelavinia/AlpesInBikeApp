@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   heroTitle: { ...Type.display3, color: Colors.text.inverse, marginBottom: Spacing.md, fontSize: 22 },
   heroBtns: { flexDirection: "row", gap: 8 },
   heroCta: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: Colors.brand.orange, paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.pill },
-  heroCtaSecondary: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(255,255,255,0.18)", paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.pill, borderWidth: 1, borderColor: "rgba(255,255,255,0.3)" },
+  heroCtaSecondary: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(10,10,10,0.55)", paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.pill, borderWidth: 1, borderColor: "rgba(255,255,255,0.45)" },
   heroCtaText: { ...Type.bodyXs, color: Colors.text.inverse, fontWeight: "700" },
   statsRow: { flexDirection: "row", paddingHorizontal: Spacing.lg, gap: 8, marginBottom: Spacing.lg },
   miniStat: { flex: 1, padding: Spacing.md, backgroundColor: Colors.bg.card, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border.subtle, gap: 4 },

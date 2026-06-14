@@ -97,7 +97,9 @@ export default function WidgetsSettings() {
         </View>
 
         <View style={styles.tipCard}>
-          <Text style={styles.tipEmoji}>🚴</Text>
+          <View style={styles.tipIcon}>
+            <Ionicons name="bicycle" size={22} color={Colors.brand.forest} />
+          </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.tipTitle}>Astuce des rideurs accros</Text>
             <Text style={styles.tipDesc}>
@@ -141,7 +143,7 @@ const styles = StyleSheet.create({
   howNumText: { ...Type.bodyXs, color: Colors.text.inverse, fontWeight: "700", fontSize: 11 },
   howStepText: { flex: 1, ...Type.bodyXs, color: Colors.text.secondary, lineHeight: 17 },
   tipCard: { marginHorizontal: Spacing.lg, marginTop: Spacing.lg, padding: Spacing.md, borderRadius: Radius.md, backgroundColor: "rgba(13,79,61,0.06)", borderWidth: 1, borderColor: "rgba(13,79,61,0.18)", flexDirection: "row", gap: 12 },
-  tipEmoji: { fontSize: 28 },
+  tipIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(13,79,61,0.14)", alignItems: "center", justifyContent: "center" },
   tipTitle: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700" },
   tipDesc: { ...Type.bodyXs, color: Colors.text.muted, marginTop: 4, lineHeight: 17 },
 });

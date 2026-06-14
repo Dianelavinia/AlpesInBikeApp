@@ -323,7 +323,7 @@ export function getMotivation(
 ) {
   if (!meRank) {
     return {
-      emoji: "🚴",
+      icon: "bicycle-outline",
       title: "Lancez votre premier ride",
       body: "Vous apparaîtrez dans le classement dès votre première sortie.",
     };
@@ -333,16 +333,16 @@ export function getMotivation(
   const percentile = total > 0 ? Math.round(((total - meRank + 1) / total) * 100) : 0;
 
   if (meRank === 1) {
-    return { emoji: "👑", title: "Vous êtes en tête", body: `Tenez votre place, vous dominez sur ${meta.label.toLowerCase()}.` };
+    return { icon: "trophy-outline", title: "Vous êtes en tête", body: `Tenez votre place, vous dominez sur ${meta.label.toLowerCase()}.` };
   }
   if (meRank <= 3) {
-    return { emoji: "🥇", title: `Podium, position ${meRank}`, body: `Plus que ${Math.round(gap)} ${meta.unit} pour passer numéro 1.` };
+    return { icon: "medal-outline", title: `Podium, position ${meRank}`, body: `Plus que ${Math.round(gap)} ${meta.unit} pour passer numéro 1.` };
   }
   if (percentile >= 75) {
-    return { emoji: "🔥", title: `Top ${100 - percentile}% des rideurs`, body: `Vous êtes ${meRank}e sur ${total}, gardez le rythme.` };
+    return { icon: "flame-outline", title: `Top ${100 - percentile}% des rideurs`, body: `Vous êtes ${meRank}e sur ${total}, gardez le rythme.` };
   }
   if (percentile >= 50) {
-    return { emoji: "💪", title: "Au-dessus de la moyenne", body: `Position ${meRank} sur ${total}. Quelques rides et le top 25% est à vous.` };
+    return { icon: "barbell-outline", title: "Au-dessus de la moyenne", body: `Position ${meRank} sur ${total}. Quelques rides et le top 25% est à vous.` };
   }
-  return { emoji: "🌱", title: "À vous de jouer", body: `Position ${meRank} sur ${total}. Un ride régulier suffit pour grimper vite.` };
+  return { icon: "leaf-outline", title: "À vous de jouer", body: `Position ${meRank} sur ${total}. Un ride régulier suffit pour grimper vite.` };
 }

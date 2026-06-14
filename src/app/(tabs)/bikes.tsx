@@ -55,7 +55,7 @@ function BikeCard({ bike, onPress }: { bike: BikeModel; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && { opacity: 0.9 }]}>
       <View style={[styles.cardHero, { backgroundColor: bike.color }]}>
-        <Text style={styles.emoji}>{bike.emoji}</Text>
+        <Ionicons name={bike.icon as any} size={68} color="rgba(255,255,255,0.95)" />
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{bike.brand}</Text>
         </View>

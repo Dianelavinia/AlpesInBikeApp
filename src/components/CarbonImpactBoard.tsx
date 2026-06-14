@@ -20,7 +20,9 @@ export default function CarbonImpactBoard() {
     <View style={{ gap: Spacing.lg }}>
       <View style={styles.motivationCard}>
         <LinearGradient colors={[Colors.brand.orange, Colors.brand.orangeDark]} style={StyleSheet.absoluteFill} />
-        <Text style={styles.motivationEmoji}>{message.emoji}</Text>
+        <View style={styles.motivationIcon}>
+          <Ionicons name={message.icon as any} size={26} color={Colors.text.inverse} />
+        </View>
         <Text style={styles.motivationHead}>{message.headline}</Text>
         <Text style={styles.motivationBody}>{message.body}</Text>
       </View>
@@ -32,8 +34,10 @@ export default function CarbonImpactBoard() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingRight: 16 }}>
           {equivalents.map((e, i) => (
             <View key={i} style={[styles.eqCard, { borderColor: `${e.tint}40` }]}>
-              <Text style={styles.eqEmoji}>{e.emoji}</Text>
-              <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4, marginTop: 6 }}>
+              <View style={[styles.eqIcon, { backgroundColor: `${e.tint}15` }]}>
+                <Ionicons name={e.icon as any} size={22} color={e.tint} />
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4, marginTop: 8 }}>
                 <Text style={[styles.eqBig, { color: e.tint }]}>{e.big}</Text>
                 <Text style={styles.eqUnit}>{e.unit}</Text>
               </View>
@@ -76,7 +80,9 @@ export default function CarbonImpactBoard() {
 
       <View style={styles.shareCard}>
         <View style={styles.shareLeft}>
-          <Text style={styles.shareEmoji}>📣</Text>
+          <View style={styles.shareIcon}>
+            <Ionicons name="megaphone-outline" size={20} color={Colors.brand.forest} />
+          </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.shareTitle}>Inspirez vos amis</Text>
             <Text style={styles.shareDesc}>Partagez votre impact pour donner envie autour de vous</Text>
@@ -93,13 +99,13 @@ export default function CarbonImpactBoard() {
 
 const styles = StyleSheet.create({
   motivationCard: { marginHorizontal: Spacing.lg, padding: Spacing.lg, borderRadius: Radius.lg, overflow: "hidden", alignItems: "center" },
-  motivationEmoji: { fontSize: 40 },
+  motivationIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: "rgba(255,255,255,0.16)", alignItems: "center", justifyContent: "center", marginBottom: 4 },
   motivationHead: { ...Type.display3, color: Colors.text.inverse, fontSize: 22, textAlign: "center", marginTop: 8 },
   motivationBody: { ...Type.bodySm, color: "rgba(255,255,255,0.92)", textAlign: "center", marginTop: 6, lineHeight: 20, paddingHorizontal: 8 },
   sectionHead: { paddingHorizontal: Spacing.lg, marginBottom: Spacing.sm },
   sectionLabel: { ...Type.label, color: Colors.text.muted, marginBottom: 8 },
   eqCard: { width: 200, padding: Spacing.md, borderRadius: Radius.md, backgroundColor: Colors.bg.card, borderWidth: 1, marginLeft: Spacing.lg, gap: 4 },
-  eqEmoji: { fontSize: 30 },
+  eqIcon: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
   eqBig: { ...Type.display1, fontSize: 32, fontWeight: "700" },
   eqUnit: { ...Type.bodySm, color: Colors.text.secondary, fontWeight: "600", fontSize: 13 },
   eqDesc: { ...Type.bodyXs, color: Colors.text.muted, marginTop: 4, lineHeight: 16 },
@@ -116,7 +122,7 @@ const styles = StyleSheet.create({
   projBadgeText: { ...Type.bodyXs, fontWeight: "700", fontSize: 11 },
   shareCard: { marginHorizontal: Spacing.lg, padding: Spacing.md, borderRadius: Radius.md, backgroundColor: "rgba(13,79,61,0.06)", borderWidth: 1, borderColor: "rgba(13,79,61,0.2)", flexDirection: "row", alignItems: "center", gap: 12 },
   shareLeft: { flex: 1, flexDirection: "row", alignItems: "center", gap: 10 },
-  shareEmoji: { fontSize: 28 },
+  shareIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(13,79,61,0.14)", alignItems: "center", justifyContent: "center" },
   shareTitle: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700", fontSize: 14 },
   shareDesc: { ...Type.bodyXs, color: Colors.text.muted, marginTop: 2 },
   shareBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: Radius.pill, backgroundColor: Colors.brand.forest },

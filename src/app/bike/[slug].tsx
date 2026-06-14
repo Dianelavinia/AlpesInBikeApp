@@ -21,7 +21,7 @@ export default function BikeDetail() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         <View style={[styles.hero, { backgroundColor: bike.color }]}>
-          <Text style={styles.heroEmoji}>{bike.emoji}</Text>
+          <Ionicons name={bike.icon as any} size={120} color="rgba(255,255,255,0.95)" />
         </View>
 
         <View style={styles.body}>

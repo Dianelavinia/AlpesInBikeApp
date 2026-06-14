@@ -33,7 +33,7 @@ const translations = {
     tabs: {
       home: "Accueil",
       bikes: "Vélos",
-      bookings: "Réservations",
+      bookings: "Réserver",
       profile: "Compte",
     },
     home: {
