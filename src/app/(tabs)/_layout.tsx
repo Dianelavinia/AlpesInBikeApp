@@ -7,7 +7,7 @@ import { t } from "@/lib/i18n";
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
-  const bottomPad = Platform.OS === "web" ? 8 : Math.max(insets.bottom, 8);
+  const bottomPad = Platform.OS === "web" ? 10 : Math.max(insets.bottom, 10);
 
   return (
     <Tabs
@@ -17,11 +17,13 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: Colors.bg.card,
           borderTopColor: Colors.border.subtle,
-          height: 56 + bottomPad,
-          paddingTop: 6,
+          height: 64 + bottomPad,
+          paddingTop: 10,
           paddingBottom: bottomPad,
         },
-        tabBarLabelStyle: { fontSize: 10.5, fontWeight: "600", letterSpacing: 0, marginTop: 2 },
+        tabBarItemStyle: { paddingVertical: 0, justifyContent: "center" },
+        tabBarIconStyle: { marginBottom: 2 },
+        tabBarLabelStyle: { fontSize: 10.5, fontWeight: "600", letterSpacing: 0, marginTop: 0, paddingBottom: 0, includeFontPadding: false },
         headerShown: false,
       }}
     >

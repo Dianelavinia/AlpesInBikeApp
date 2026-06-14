@@ -30,12 +30,17 @@ export default function Bikes() {
         <Text style={styles.subtitle}>{t("bikes.subtitle")}</Text>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-        {FILTERS.map((f) => (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.filtersScroll}
+        contentContainerStyle={styles.filters}
+      >
+        {FILTERS.map((f, i) => (
           <Pressable
             key={f.id}
             onPress={() => setFilter(f.id)}
-            style={[styles.chip, filter === f.id && styles.chipActive]}
+            style={[styles.chip, i > 0 && { marginLeft: 8 }, filter === f.id && styles.chipActive]}
           >
             <Text style={[styles.chipText, filter === f.id && styles.chipTextActive]}>{f.label}</Text>
           </Pressable>
@@ -91,8 +96,9 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.md, paddingBottom: Spacing.lg },
   title: { ...Type.display1, color: Colors.text.primary, fontSize: 34 },
   subtitle: { ...Type.body, color: Colors.text.muted, marginTop: 4 },
-  filters: { paddingHorizontal: Spacing.lg, gap: 8, paddingBottom: Spacing.lg },
-  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: Radius.pill, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.subtle },
+  filtersScroll: { flexGrow: 0, maxHeight: 60, marginBottom: Spacing.md },
+  filters: { paddingHorizontal: Spacing.lg, alignItems: "center", paddingVertical: 6 },
+  chip: { paddingHorizontal: 14, height: 34, justifyContent: "center", borderRadius: Radius.pill, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.subtle },
   chipActive: { backgroundColor: Colors.brand.ink, borderColor: Colors.brand.ink },
   chipText: { ...Type.bodySm, color: Colors.text.secondary, fontWeight: "600" },
   chipTextActive: { color: Colors.text.inverse },

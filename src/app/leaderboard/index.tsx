@@ -80,7 +80,7 @@ export default function Leaderboard() {
         </View>
 
         <Text style={styles.filterLabel}>Comparer avec</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll} contentContainerStyle={styles.chipsRow}>
           {SCOPES.map((s) => (
             <Chip key={s} active={scope === s} label={SCOPE_META[s].label} icon={SCOPE_META[s].icon as any} onPress={() => setScope(s)} />
           ))}
@@ -99,7 +99,7 @@ export default function Leaderboard() {
         </View>
 
         <Text style={styles.filterLabel}>Critère</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll} contentContainerStyle={styles.chipsRow}>
           {METRICS.map((m) => {
             const mm = METRIC_META[m];
             const active = metric === m;
@@ -270,8 +270,9 @@ const styles = StyleSheet.create({
   heroDividerV: { width: 1, height: 30, backgroundColor: "rgba(255,255,255,0.15)" },
 
   filterLabel: { ...Type.label, color: Colors.text.muted, marginHorizontal: Spacing.lg, marginTop: Spacing.lg, marginBottom: 8 },
-  chipsRow: { paddingHorizontal: Spacing.lg, gap: 8 },
-  chip: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: Radius.pill, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.subtle },
+  chipsScroll: { flexGrow: 0, maxHeight: 60 },
+  chipsRow: { paddingHorizontal: Spacing.lg, alignItems: "center", paddingVertical: 6 },
+  chip: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, height: 34, marginRight: 8, borderRadius: Radius.pill, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.subtle },
   chipActive: { backgroundColor: Colors.brand.ink, borderColor: Colors.brand.ink },
   chipText: { ...Type.bodyXs, color: Colors.text.secondary, fontWeight: "700", fontSize: 12 },
   chipTextActive: { color: Colors.text.inverse },
@@ -283,7 +284,7 @@ const styles = StyleSheet.create({
   periodText: { ...Type.bodyXs, color: Colors.text.secondary, fontWeight: "700", fontSize: 12 },
   periodTextActive: { color: Colors.text.inverse },
 
-  metricChip: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: Radius.pill, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.base },
+  metricChip: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, height: 34, marginRight: 8, borderRadius: Radius.pill, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.base },
   metricText: { ...Type.bodyXs, fontWeight: "700", fontSize: 12 },
 
   podium: { flexDirection: "row", alignItems: "flex-end", justifyContent: "center", gap: 10, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.xl, paddingTop: Spacing.lg },

@@ -37,12 +37,17 @@ export default function Community() {
         </Pressable>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-        {FILTERS.map((f) => (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.filtersScroll}
+        contentContainerStyle={styles.filters}
+      >
+        {FILTERS.map((f, i) => (
           <Pressable
             key={f.id}
             onPress={() => setFilter(f.id)}
-            style={[styles.chip, filter === f.id && styles.chipActive]}
+            style={[styles.chip, i > 0 && { marginLeft: 8 }, filter === f.id && styles.chipActive]}
           >
             <Text style={[styles.chipText, filter === f.id && styles.chipTextActive]}>{f.label}</Text>
           </Pressable>
@@ -129,8 +134,9 @@ const styles = StyleSheet.create({
   subtitle: { ...Type.bodySm, color: Colors.text.muted, marginTop: 2 },
   recordBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: Colors.brand.orange, paddingHorizontal: 14, paddingVertical: 9, borderRadius: Radius.pill },
   recordText: { ...Type.bodySm, color: Colors.text.inverse, fontWeight: "700", fontSize: 13 },
-  filters: { paddingHorizontal: Spacing.lg, gap: 8, paddingBottom: Spacing.md },
-  chip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: Radius.pill, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.subtle },
+  filtersScroll: { flexGrow: 0, maxHeight: 60, marginBottom: Spacing.sm },
+  filters: { paddingHorizontal: Spacing.lg, alignItems: "center", paddingVertical: 6 },
+  chip: { paddingHorizontal: 14, height: 34, justifyContent: "center", borderRadius: Radius.pill, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.subtle },
   chipActive: { backgroundColor: Colors.brand.ink, borderColor: Colors.brand.ink },
   chipText: { ...Type.bodySm, color: Colors.text.secondary, fontWeight: "600", fontSize: 13 },
   chipTextActive: { color: Colors.text.inverse },
