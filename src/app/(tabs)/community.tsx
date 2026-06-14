@@ -37,6 +37,20 @@ export default function Community() {
         </Pressable>
       </View>
 
+      <Pressable
+        onPress={() => router.push("/buddies" as any)}
+        style={({ pressed }) => [styles.buddiesCta, pressed && { opacity: 0.92 }]}
+      >
+        <View style={styles.buddiesIcon}>
+          <Ionicons name="people-circle" size={22} color={Colors.brand.forest} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.buddiesTitle}>Trouver des copains de route</Text>
+          <Text style={styles.buddiesDesc}>9 rideurs compatibles · 4 sorties groupe ce weekend</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={Colors.text.muted} />
+      </Pressable>
+
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -134,6 +148,10 @@ const styles = StyleSheet.create({
   subtitle: { ...Type.bodySm, color: Colors.text.muted, marginTop: 2 },
   recordBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: Colors.brand.orange, paddingHorizontal: 14, paddingVertical: 9, borderRadius: Radius.pill },
   recordText: { ...Type.bodySm, color: Colors.text.inverse, fontWeight: "700", fontSize: 13 },
+  buddiesCta: { flexDirection: "row", alignItems: "center", gap: 12, marginHorizontal: Spacing.lg, marginBottom: Spacing.md, padding: Spacing.md, borderRadius: Radius.md, backgroundColor: "rgba(13,79,61,0.06)", borderWidth: 1, borderColor: "rgba(13,79,61,0.2)" },
+  buddiesIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.bg.card, alignItems: "center", justifyContent: "center" },
+  buddiesTitle: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700", fontSize: 14 },
+  buddiesDesc: { ...Type.bodyXs, color: Colors.text.muted, marginTop: 2 },
   filtersScroll: { flexGrow: 0, maxHeight: 60, marginBottom: Spacing.sm },
   filters: { paddingHorizontal: Spacing.lg, alignItems: "center", paddingVertical: 6 },
   chip: { paddingHorizontal: 14, height: 34, justifyContent: "center", borderRadius: Radius.pill, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.subtle },

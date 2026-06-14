@@ -76,6 +76,7 @@ export default function Home() {
           <Text style={styles.sectionLabel}>Tous vos outils</Text>
           <View style={styles.toolGrid}>
             <ToolCard icon="compass-outline" label="Rides" onPress={() => router.push("/(tabs)/community")} />
+            <ToolCard icon="people-circle-outline" label="Copains" onPress={() => router.push("/buddies" as any)} />
             <ToolCard icon="bicycle-outline" label="Vélos" onPress={() => router.push("/(tabs)/bikes")} />
             <ToolCard icon="calendar-outline" label="Réservations" onPress={() => router.push("/(tabs)/bookings")} />
             <ToolCard icon="alert-circle-outline" label="Signalements" onPress={() => router.push("/reports")} />
