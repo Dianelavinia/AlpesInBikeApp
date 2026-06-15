@@ -1,37 +1,44 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Alert, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useState, useEffect } from "react";
 import RideMap from "@/components/RideMap";
 import LiveEffortPanel from "@/components/LiveEffortPanel";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
-
-type Status = "idle" | "recording" | "paused";
+import { useRideTracker, formatElapsed, mpsToKmh } from "@/lib/ride-tracker";
 
 export default function RecordRide() {
   const router = useRouter();
-  const [status, setStatus] = useState<Status>("idle");
-  const [elapsed, setElapsed] = useState(0);
-  const [distance, setDistance] = useState(0);
-  const [elevation, setElevation] = useState(0);
+  const { stats, start, pause, resume, stop, reset } = useRideTracker();
+  const status = stats.status === "finished" ? "paused" : stats.status;
+  const elapsed = stats.elapsedSec;
+  const distanceKm = stats.distanceM / 1000;
+  const elevation = stats.elevationGainM;
+  const speedKmh = mpsToKmh(stats.speedMps);
 
-  useEffect(() => {
-    if (status !== "recording") return;
-    const id = setInterval(() => {
-      setElapsed((e) => e + 1);
-      setDistance((d) => d + 0.005);
-      setElevation((el) => el + Math.random() * 0.4);
-    }, 1000);
-    return () => clearInterval(id);
-  }, [status]);
-
-  function hhmmss(s: number) {
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const sec = s % 60;
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+  async function handleStart() {
+    if (Platform.OS === "web") {
+      Alert.alert(
+        "Mode démo Web",
+        "Le tracking GPS background ne fonctionne que sur device iOS/Android. Sur le device, l'app demandera les permissions Localisation et continuera à enregistrer même écran verrouillé.",
+        [{ text: "OK" }],
+      );
+    }
+    const r = await start();
+    if (!r.ok && Platform.OS !== "web") {
+      Alert.alert("GPS indisponible", r.error ?? "Activez la localisation dans Réglages.");
+    }
   }
+
+  async function handleFinish() {
+    const final = await stop();
+    // En prod : await supabase.from("rides").insert({ ...final })
+    console.log("[ride] saved", { distance_m: final.distanceM, points: final.points.length });
+    router.replace("/(tabs)/community");
+    setTimeout(reset, 500);
+  }
+
+  const hhmmss = formatElapsed;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -63,10 +70,10 @@ export default function RecordRide() {
         </View>
 
         <View style={styles.statsGrid}>
-          <MetricBox label="Distance" value={distance.toFixed(2)} unit="km" />
-          <MetricBox label="Vitesse" value={status === "recording" ? (8 + Math.random() * 6).toFixed(1) : "0.0"} unit="km/h" />
+          <MetricBox label="Distance" value={distanceKm.toFixed(2)} unit="km" />
+          <MetricBox label="Vitesse" value={speedKmh.toFixed(1)} unit="km/h" />
           <MetricBox label="Dénivelé" value={`+${Math.floor(elevation)}`} unit="m" />
-          <MetricBox label="Calories" value={Math.floor(elapsed * 4.2).toString()} unit="kcal" />
+          <MetricBox label="Calories" value={Math.floor(stats.caloriesKcal).toString()} unit="kcal" />
         </View>
       </View>
 
@@ -74,7 +81,7 @@ export default function RecordRide() {
 
       <View style={styles.controls}>
         {status === "idle" && (
-          <Pressable onPress={() => setStatus("recording")} style={({ pressed }) => [styles.startBtn, pressed && { opacity: 0.85 }]}>
+          <Pressable onPress={handleStart} style={({ pressed }) => [styles.startBtn, pressed && { opacity: 0.85 }]}>
             <View style={styles.startInner}>
               <Ionicons name="play" size={32} color={Colors.text.inverse} />
             </View>
@@ -83,18 +90,18 @@ export default function RecordRide() {
         )}
         {status === "recording" && (
           <View style={styles.recordingControls}>
-            <Pressable onPress={() => setStatus("paused")} style={({ pressed }) => [styles.pauseBtn, pressed && { opacity: 0.85 }]}>
+            <Pressable onPress={pause} style={({ pressed }) => [styles.pauseBtn, pressed && { opacity: 0.85 }]}>
               <Ionicons name="pause" size={28} color={Colors.text.inverse} />
             </Pressable>
           </View>
         )}
         {status === "paused" && (
           <View style={styles.pausedControls}>
-            <Pressable onPress={() => setStatus("recording")} style={({ pressed }) => [styles.resumeBtn, pressed && { opacity: 0.85 }]}>
+            <Pressable onPress={resume} style={({ pressed }) => [styles.resumeBtn, pressed && { opacity: 0.85 }]}>
               <Ionicons name="play" size={22} color={Colors.text.inverse} />
               <Text style={styles.resumeText}>Reprendre</Text>
             </Pressable>
-            <Pressable onPress={() => router.replace("/(tabs)/community")} style={({ pressed }) => [styles.finishBtn, pressed && { opacity: 0.85 }]}>
+            <Pressable onPress={handleFinish} style={({ pressed }) => [styles.finishBtn, pressed && { opacity: 0.85 }]}>
               <Ionicons name="checkmark" size={22} color={Colors.brand.orange} />
               <Text style={styles.finishText}>Terminer et partager</Text>
             </Pressable>

@@ -7,9 +7,30 @@ import { Colors, Radius, Spacing, Type } from "@/constants/theme";
 import { t } from "@/lib/i18n";
 import CarbonHomeWidget from "@/components/CarbonHomeWidget";
 import LeaderboardTeaser from "@/components/LeaderboardTeaser";
+import { useEffect } from "react";
+import { useCarbonStats } from "@/lib/carbon";
+import { useLeaderboard } from "@/lib/leaderboard";
+import { syncWidgetSnapshot } from "@/lib/widget-sync";
 
 export default function Home() {
   const router = useRouter();
+  const { stats: carbon } = useCarbonStats();
+  const { data: lb } = useLeaderboard("global", "month", "km");
+
+  useEffect(() => {
+    if (!carbon || !lb) return;
+    syncWidgetSnapshot({
+      km: Math.round(lb.meValue),
+      kmThisWeek: Math.round(lb.meValue / 4),
+      co2: carbon.co2Saved,
+      rank: lb.meScopeRank ?? 0,
+      rankTotal: lb.total,
+      streakDays: 12,
+      monthlyKm: Math.round(lb.meValue),
+      monthlyGoal: 400,
+      badges: 8,
+    });
+  }, [carbon?.co2Saved, lb?.meValue, lb?.meScopeRank]);
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>

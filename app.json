@@ -1,23 +1,56 @@
 {
   "expo": {
-    "name": "AlpesInBikeApp",
+    "name": "Alpes in Bike",
     "slug": "AlpesInBikeApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "alpesinbikeapp",
+    "scheme": "alpesinbike",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.alpesinbike.app",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Alpes in Bike utilise votre position pour enregistrer le tracé GPS de vos rides et trouver les copains à proximité.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Alpes in Bike a besoin d'accéder à votre position en arrière-plan pour continuer à enregistrer votre ride même quand l'écran est verrouillé.",
+        "NSMotionUsageDescription": "Alpes in Bike utilise les capteurs de mouvement pour mesurer votre cadence et détecter les chutes.",
+        "NSCameraUsageDescription": "Alpes in Bike utilise l'appareil photo pour personnaliser les visuels de vos rides et enregistrer l'état de votre vélo.",
+        "NSPhotoLibraryUsageDescription": "Alpes in Bike accède à votre photothèque pour choisir une photo de fond lors du partage d'un ride.",
+        "NSPhotoLibraryAddUsageDescription": "Alpes in Bike enregistre les visuels de partage de vos rides dans votre photothèque.",
+        "NSBluetoothAlwaysUsageDescription": "Alpes in Bike se connecte à votre ceinture cardio, capteur de puissance ou cadence en Bluetooth pour enrichir vos statistiques de ride.",
+        "NSHealthShareUsageDescription": "Alpes in Bike lit votre rythme cardiaque depuis l'app Santé pour calculer vos zones d'effort.",
+        "NSHealthUpdateUsageDescription": "Alpes in Bike enregistre vos rides dans l'app Santé.",
+        "UIBackgroundModes": [
+          "location",
+          "fetch",
+          "remote-notification",
+          "bluetooth-central"
+        ]
+      }
     },
     "android": {
+      "package": "com.alpesinbike.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "BLUETOOTH",
+        "BLUETOOTH_ADMIN",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_SCAN",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACTIVITY_RECOGNITION"
+      ]
     },
     "web": {
       "output": "static",
@@ -28,13 +61,48 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#0D4F3D",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "expo-apple-authentication",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Alpes in Bike a besoin d'accéder à votre position en arrière-plan pour continuer à enregistrer votre ride même quand l'écran est verrouillé.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Alpes in Bike accède à votre photothèque pour choisir une photo de fond lors du partage d'un ride.",
+          "cameraPermission": "Alpes in Bike utilise l'appareil photo pour personnaliser les visuels de vos rides."
+        }
+      ],
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "modes": [
+            "peripheral",
+            "central"
+          ],
+          "bluetoothAlwaysPermission": "Alpes in Bike se connecte à votre ceinture cardio, capteur de puissance ou cadence en Bluetooth."
+        }
+      ],
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "Alpes in Bike lit votre rythme cardiaque pour calculer vos zones d'effort.",
+          "NSHealthUpdateUsageDescription": "Alpes in Bike enregistre vos rides dans l'app Santé."
+        }
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,

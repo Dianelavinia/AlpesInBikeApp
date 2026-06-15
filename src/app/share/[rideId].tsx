@@ -2,7 +2,10 @@ import { View, Text, Pressable, StyleSheet, ScrollView, Image, Platform, Alert }
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import ViewShot from "react-native-view-shot";
+import * as ImagePicker from "expo-image-picker";
+import * as Sharing from "expo-sharing";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
 import { ACTIVITIES } from "@/lib/activities";
 import RideShareCard, { type ShareRide } from "@/components/RideShareCard";
@@ -26,6 +29,8 @@ export default function ShareRide() {
   const [format, setFormat] = useState<ShareFormat>("story");
   const [template, setTemplate] = useState<ShareTemplate>("dark-bottom");
   const [photo, setPhoto] = useState<string>(ALPES_PHOTOS[0].url);
+  const [busy, setBusy] = useState(false);
+  const viewShotRef = useRef<any>(null);
 
   if (!activity) return null;
 
@@ -42,16 +47,62 @@ export default function ShareRide() {
 
   const PREVIEW_WIDTH = format === "story" ? 220 : format === "square" ? 280 : 320;
 
-  function share(target: string) {
-    const caption = generateCaption(ride);
-    if (Platform.OS === "web" && typeof navigator !== "undefined" && (navigator as any).share) {
-      (navigator as any).share({ title: ride.title, text: caption }).catch(() => {});
+  async function pickOwnPhoto() {
+    if (Platform.OS === "web") {
+      Alert.alert("Mode démo", "Sur device, la photothèque s'ouvre via expo-image-picker.");
       return;
     }
-    Alert.alert(
-      `Partage ${target}`,
-      "Sur device natif, la carte est capturee en PNG via react-native-view-shot puis envoyee via expo-sharing.\n\nLegende automatique :\n\n" + caption.slice(0, 180) + "...",
-    );
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (perm.status !== "granted") {
+      Alert.alert("Accès refusé", "Activez l'accès à la photothèque dans Réglages.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.9,
+      allowsEditing: true,
+      aspect: format === "story" ? [9, 16] : format === "square" ? [1, 1] : [16, 9],
+    });
+    if (!result.canceled && result.assets[0]) {
+      setPhoto(result.assets[0].uri);
+    }
+  }
+
+  async function share(target: string) {
+    const caption = generateCaption(ride);
+
+    // Web fallback : Web Share API si dispo
+    if (Platform.OS === "web") {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        try {
+          await (navigator as any).share({ title: ride.title, text: caption });
+        } catch {
+          // user cancelled
+        }
+        return;
+      }
+      Alert.alert("Mode démo Web", "Sur device, la carte est capturée en PNG haute résolution puis partagée via le sheet natif iOS/Android.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      if (!viewShotRef.current || typeof (viewShotRef.current as any).capture !== "function") {
+        throw new Error("Capture indisponible");
+      }
+      const uri: string = await (viewShotRef.current as any).capture();
+      const available = await Sharing.isAvailableAsync();
+      if (!available) throw new Error("Partage indisponible sur cet appareil");
+      await Sharing.shareAsync(uri, {
+        mimeType: "image/png",
+        dialogTitle: `Partager le ride ${ride.title}`,
+        UTI: "public.png",
+      });
+    } catch (e: any) {
+      Alert.alert("Erreur partage", e?.message ?? "Impossible de partager");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -68,7 +119,17 @@ export default function ShareRide() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.previewStage}>
-          <RideShareCard ride={ride} photoUrl={photo} format={format} template={template} width={PREVIEW_WIDTH} />
+          <ViewShot
+            ref={viewShotRef}
+            options={{
+              format: "png",
+              quality: 1,
+              width: FORMAT_META[format].width,
+              height: FORMAT_META[format].height,
+            }}
+          >
+            <RideShareCard ride={ride} photoUrl={photo} format={format} template={template} width={PREVIEW_WIDTH} />
+          </ViewShot>
         </View>
 
         <Text style={styles.sectionLabel}>Format</Text>
@@ -109,7 +170,7 @@ export default function ShareRide() {
 
         <Text style={styles.sectionLabel}>Photo de fond</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoScroll} contentContainerStyle={styles.photoRow}>
-          <Pressable style={styles.photoUpload}>
+          <Pressable onPress={pickOwnPhoto} style={styles.photoUpload}>
             <Ionicons name="image-outline" size={24} color={Colors.brand.orange} />
             <Text style={styles.photoUploadText}>Ma photo</Text>
           </Pressable>
