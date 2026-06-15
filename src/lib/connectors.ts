@@ -86,7 +86,7 @@ const MOCK_STATE: Record<ConnectorId, Partial<ConnectorStatus>> = {
   "wahoo":           { connected: false },
   "fitbit":          { connected: false },
   "samsung-health":  { connected: false },
-  "whoop":           { connected: false },
+  "whoop":           { connected: true,  lastSync: new Date(Date.now() - 1000 * 60 * 8).toISOString(), deviceName: "Whoop 4.0", batteryPct: 71 },
   "ultrahuman":      { connected: false },
   "ringconn":        { connected: false },
   "ble-power":       { connected: false },
