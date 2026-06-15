@@ -79,11 +79,16 @@ create trigger trg_ride_comments_count
   after insert or delete on public.ride_comments
   for each row execute function public.update_ride_comments_count();
 
--- RLS rides étendue : les rides publics sont lisibles par tous
-drop policy if exists "rides_select_self_or_public" on public.rides;
+-- RLS rides etendue : les rides publics sont lisibles par tous, en plus
+-- des proprietaires et des amis (cumul avec la regle de 0001)
+drop policy if exists "rides_select_self_or_friends" on public.rides;
 create policy "rides_select_self_or_friends" on public.rides
   for select to authenticated
-  using (auth.uid() = user_id or is_public = true);
+  using (
+    auth.uid() = user_id
+    or is_public = true
+    or user_id in (select fr.friend_id from public.friendships fr where fr.user_id = auth.uid())
+  );
 
 alter table public.ride_likes enable row level security;
 alter table public.ride_comments enable row level security;
