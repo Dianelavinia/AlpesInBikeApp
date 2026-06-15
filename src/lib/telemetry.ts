@@ -28,10 +28,16 @@ export type LiveTelemetry = {
   cadence: number;        // tours/min
   power: number;          // watts
   speed: number;          // km/h
+  /** Variabilité de fréquence cardiaque, ms. Disponible Polar H10, Oura, Whoop... */
+  hrv?: number;
+  /** Saturation oxygène, %. Disponible Oura, Apple Watch S7+, Garmin Venu... */
+  spo2?: number;
+  /** Température cutanée delta, en degrés C. Bague Oura, Whoop. */
+  skinTempDelta?: number;
   /** % de l'effort dans la zone cible (utilisé pour le coach). */
   effortPct: number;
   /** Source courante. Inconnu si aucun capteur. */
-  source: "ble-hr" | "apple-watch" | "wear-os" | "garmin" | "polar" | "wahoo" | "simulator";
+  source: "ble-hr" | "apple-watch" | "wear-os" | "garmin" | "polar" | "wahoo" | "oura" | "whoop" | "ultrahuman" | "simulator";
   /** Signal radio (BLE / GPS / réseau). */
   signal: "good" | "weak" | "lost";
   batteryPct?: number;
@@ -85,7 +91,11 @@ function makeSim(config: SimConfig) {
     const zone = hrToZone(hr, 186);
     const target: HrZone = 3;
     const effortPct = Math.max(0, Math.min(100, 100 - Math.abs(zone - target) * 20));
-    return { hr, hrZone: zone, cadence, power, speed, effortPct, source: "simulator", signal: "good", batteryPct: 78 };
+    // Simule des metrics avancees (Oura/Whoop) :
+    const hrv = Math.round(45 + Math.sin(t / 22) * 8);
+    const spo2 = Math.round(96 + Math.sin(t / 17) * 1.5);
+    const skinTempDelta = parseFloat((Math.sin(t / 31) * 0.3).toFixed(2));
+    return { hr, hrZone: zone, cadence, power, speed, hrv, spo2, skinTempDelta, effortPct, source: "simulator", signal: "good", batteryPct: 78 };
   };
 }
 

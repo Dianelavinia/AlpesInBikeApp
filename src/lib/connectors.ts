@@ -29,7 +29,13 @@ export type ConnectorId =
   | "suunto"
   | "wahoo"
   | "ble-hr"
-  | "ble-power";
+  | "ble-power"
+  | "oura"
+  | "ultrahuman"
+  | "ringconn"
+  | "whoop"
+  | "fitbit"
+  | "samsung-health";
 
 export type ConnectorStatus = {
   id: ConnectorId;
@@ -39,7 +45,8 @@ export type ConnectorStatus = {
   brandColor: string;
   description: string;
   protocol: "healthkit" | "health-connect" | "oauth" | "ble" | "ant+";
-  capabilities: Array<"history" | "live-hr" | "live-power" | "live-cadence" | "live-gps" | "upload">;
+  capabilities: Array<"history" | "live-hr" | "live-power" | "live-cadence" | "live-gps" | "upload" | "hrv" | "spo2" | "skin-temp" | "stress" | "sleep" | "recovery">;
+  form: "watch" | "phone" | "chest-strap" | "ring" | "bracelet" | "power-meter" | "app";
   connected: boolean;
   lastSync?: string;     // ISO timestamp
   deviceName?: string;
@@ -47,28 +54,42 @@ export type ConnectorStatus = {
 };
 
 const CATALOG: Omit<ConnectorStatus, "connected" | "lastSync" | "deviceName" | "batteryPct">[] = [
-  { id: "apple-health", name: "Apple Santé", brand: "Apple",   icon: "logo-apple",       brandColor: "#000000", description: "Tous vos rides Apple Watch synchronisés en arrière-plan.", protocol: "healthkit",      capabilities: ["history","live-hr","live-gps","upload"] },
-  { id: "google-fit",   name: "Google Fit",  brand: "Google",  icon: "logo-google",      brandColor: "#0F9D58", description: "Compatible Wear OS, Fitbit, Samsung Health via Health Connect.", protocol: "health-connect", capabilities: ["history","live-hr","upload"] },
-  { id: "strava",       name: "Strava",      brand: "Strava",  icon: "flame-outline",    brandColor: "#FC5200", description: "Import auto de tous vos rides Strava et upload des sorties Alpes in Bike.", protocol: "oauth",         capabilities: ["history","upload"] },
-  { id: "garmin",       name: "Garmin Connect", brand: "Garmin", icon: "watch-outline",  brandColor: "#000000", description: "Edge, Forerunner, Fenix, Vivoactive : capteurs et historique.", protocol: "oauth",         capabilities: ["history","live-hr","live-power","live-cadence","live-gps","upload"] },
-  { id: "polar",        name: "Polar Flow",  brand: "Polar",   icon: "fitness-outline",  brandColor: "#E50000", description: "Vantage, Grit X, H10 cardio.", protocol: "oauth", capabilities: ["history","live-hr","upload"] },
-  { id: "suunto",       name: "Suunto",      brand: "Suunto",  icon: "compass-outline",  brandColor: "#0F1419", description: "Race, Vertical, 9 Peak. Excellent pour le trail/VTT engagé.", protocol: "oauth", capabilities: ["history","live-hr","live-gps","upload"] },
-  { id: "wahoo",        name: "Wahoo",       brand: "Wahoo",   icon: "speedometer-outline", brandColor: "#0079C1", description: "Elemnt Bolt/Roam, Tickr cardio, Kickr home-trainer.", protocol: "oauth", capabilities: ["history","live-hr","live-power","live-cadence","upload"] },
-  { id: "ble-hr",       name: "Ceinture cardio BLE", brand: "BLE", icon: "heart-outline", brandColor: "#E11D48", description: "Polar H10, Wahoo Tickr, Garmin HRM-Pro, Coospo, Magene...", protocol: "ble", capabilities: ["live-hr"] },
-  { id: "ble-power",    name: "Capteur de puissance BLE", brand: "BLE", icon: "flash-outline", brandColor: "#7C3AED", description: "Stages, 4iiii, Favero Assioma, Quarq, Power2Max.", protocol: "ble", capabilities: ["live-power","live-cadence"] },
+  { id: "apple-health",   name: "Apple Santé",         brand: "Apple",        icon: "logo-apple",          brandColor: "#000000", description: "Tous vos rides Apple Watch synchronisés en arrière-plan, plus les données HRV et SpO2.", protocol: "healthkit",      capabilities: ["history","live-hr","live-gps","upload","hrv","spo2","sleep"], form: "app" },
+  { id: "google-fit",     name: "Google Fit",           brand: "Google",       icon: "logo-google",         brandColor: "#0F9D58", description: "Compatible Wear OS, Fitbit, Samsung Health, via Health Connect Android.",                  protocol: "health-connect", capabilities: ["history","live-hr","upload","sleep"], form: "app" },
+  { id: "strava",         name: "Strava",                brand: "Strava",       icon: "flame-outline",       brandColor: "#FC5200", description: "Import auto de tous vos rides Strava et upload des sorties Alpes in Bike.",                protocol: "oauth",          capabilities: ["history","upload"], form: "app" },
+  { id: "garmin",         name: "Garmin Connect",        brand: "Garmin",       icon: "watch-outline",       brandColor: "#000000", description: "Edge, Forerunner, Fenix, Vivosmart bracelet : capteurs et historique complet.",            protocol: "oauth",          capabilities: ["history","live-hr","live-power","live-cadence","live-gps","upload","hrv","spo2","sleep","stress"], form: "watch" },
+  { id: "polar",          name: "Polar Flow",            brand: "Polar",        icon: "fitness-outline",     brandColor: "#E50000", description: "Vantage, Grit X, H10 cardio, Ignite.",                                                       protocol: "oauth",          capabilities: ["history","live-hr","upload","hrv","sleep","recovery"], form: "watch" },
+  { id: "suunto",         name: "Suunto",                 brand: "Suunto",       icon: "compass-outline",     brandColor: "#0F1419", description: "Race, Vertical, 9 Peak. Excellent pour le trail et le VTT engagé.",                          protocol: "oauth",          capabilities: ["history","live-hr","live-gps","upload","hrv"], form: "watch" },
+  { id: "wahoo",          name: "Wahoo",                  brand: "Wahoo",        icon: "speedometer-outline", brandColor: "#0079C1", description: "Elemnt Bolt/Roam compteur, Tickr cardio, Kickr home-trainer.",                              protocol: "oauth",          capabilities: ["history","live-hr","live-power","live-cadence","upload"], form: "watch" },
+  { id: "fitbit",         name: "Fitbit",                 brand: "Fitbit",       icon: "fitness-outline",     brandColor: "#00B0B9", description: "Charge, Versa, Sense. Données via Health Connect (Android) ou Apple Santé (iOS).",            protocol: "oauth",          capabilities: ["history","live-hr","upload","spo2","sleep","stress"], form: "bracelet" },
+  { id: "samsung-health", name: "Samsung Health",        brand: "Samsung",      icon: "watch-outline",       brandColor: "#1428A0", description: "Galaxy Watch, Galaxy Ring, montre-bracelet. Sync via Health Connect.",                       protocol: "health-connect", capabilities: ["history","live-hr","upload","spo2","sleep","stress","hrv"], form: "watch" },
+
+  { id: "whoop",          name: "Whoop",                  brand: "Whoop",        icon: "pulse-outline",       brandColor: "#000000", description: "Bracelet sans écran qui suit cardio, HRV, récupération et sommeil 24h/24.",                 protocol: "oauth",          capabilities: ["history","live-hr","upload","hrv","sleep","stress","recovery","skin-temp"], form: "bracelet" },
+  { id: "oura",           name: "Oura Ring",             brand: "Oura",         icon: "ellipse-outline",     brandColor: "#000000", description: "Bague intelligente cardio, HRV, SpO2, température cutanée, score sommeil et récupération.",  protocol: "oauth",          capabilities: ["history","live-hr","hrv","spo2","skin-temp","sleep","recovery","stress","upload"], form: "ring" },
+  { id: "ultrahuman",     name: "Ultrahuman Ring AIR",   brand: "Ultrahuman",   icon: "ellipse-outline",     brandColor: "#FF8A3D", description: "Bague titane légère orientée perf : HRV temps réel, charge d entrainement, glycémie en option.", protocol: "oauth",          capabilities: ["history","live-hr","hrv","spo2","skin-temp","sleep","recovery"], form: "ring" },
+  { id: "ringconn",       name: "RingConn",               brand: "RingConn",     icon: "ellipse-outline",     brandColor: "#475569", description: "Bague accessible avec cardio, HRV, SpO2, sommeil et stress. Bonne autonomie 7 jours.",         protocol: "oauth",          capabilities: ["history","live-hr","hrv","spo2","sleep","stress"], form: "ring" },
+
+  { id: "ble-hr",         name: "Ceinture cardio BLE",   brand: "BLE",          icon: "heart-outline",       brandColor: "#E11D48", description: "Polar H10, Wahoo Tickr, Garmin HRM-Pro, Coospo, Magene, brassard CooSpo.",                    protocol: "ble",            capabilities: ["live-hr"], form: "chest-strap" },
+  { id: "ble-power",      name: "Capteur de puissance BLE", brand: "BLE",       icon: "flash-outline",       brandColor: "#7C3AED", description: "Stages, 4iiii, Favero Assioma, Quarq, Power2Max.",                                              protocol: "ble",            capabilities: ["live-power","live-cadence"], form: "power-meter" },
 ];
 
-/** Mock initial pour la démo : Marie a déjà connecté Apple Watch + ceinture Polar. */
+/** Mock initial pour la démo : Marie a déjà connecté Apple Watch, ceinture Polar et bague Oura. */
 const MOCK_STATE: Record<ConnectorId, Partial<ConnectorStatus>> = {
-  "apple-health": { connected: true, lastSync: new Date(Date.now() - 1000 * 60 * 18).toISOString(), deviceName: "Apple Watch Series 10" },
-  "ble-hr":       { connected: true, deviceName: "Polar H10", batteryPct: 82 },
-  "google-fit":   { connected: false },
-  "strava":       { connected: true, lastSync: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString() },
-  "garmin":       { connected: false },
-  "polar":        { connected: false },
-  "suunto":       { connected: false },
-  "wahoo":        { connected: false },
-  "ble-power":    { connected: false },
+  "apple-health":   { connected: true,  lastSync: new Date(Date.now() - 1000 * 60 * 18).toISOString(), deviceName: "Apple Watch Series 10" },
+  "ble-hr":         { connected: true,  deviceName: "Polar H10", batteryPct: 82 },
+  "oura":            { connected: true,  lastSync: new Date(Date.now() - 1000 * 60 * 30).toISOString(), deviceName: "Oura Ring Gen 4", batteryPct: 64 },
+  "strava":          { connected: true,  lastSync: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString() },
+  "google-fit":      { connected: false },
+  "garmin":          { connected: false },
+  "polar":           { connected: false },
+  "suunto":          { connected: false },
+  "wahoo":           { connected: false },
+  "fitbit":          { connected: false },
+  "samsung-health":  { connected: false },
+  "whoop":           { connected: false },
+  "ultrahuman":      { connected: false },
+  "ringconn":        { connected: false },
+  "ble-power":       { connected: false },
 };
 
 export async function listConnectors(): Promise<ConnectorStatus[]> {

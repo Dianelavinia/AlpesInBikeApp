@@ -5,10 +5,13 @@ import { useRouter } from "expo-router";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
 import { useConnectors, formatLastSync, type ConnectorStatus } from "@/lib/connectors";
 
-const SECTION_ORDER: { title: string; ids: string[] }[] = [
-  { title: "Plateformes santé",  ids: ["apple-health", "google-fit"] },
-  { title: "Applis tierces",      ids: ["strava", "garmin", "polar", "suunto", "wahoo"] },
-  { title: "Capteurs Bluetooth",  ids: ["ble-hr", "ble-power"] },
+const SECTION_ORDER: { title: string; subtitle?: string; ids: string[] }[] = [
+  { title: "Plateformes santé",    subtitle: "Aggrégateurs natifs iOS et Android", ids: ["apple-health", "google-fit"] },
+  { title: "Montres connectées",   subtitle: "Garmin, Polar, Suunto, Samsung Galaxy Watch",    ids: ["garmin", "polar", "suunto", "samsung-health", "wahoo"] },
+  { title: "Bagues intelligentes", subtitle: "Au doigt 24h sur 24, suivi récupération et HRV", ids: ["oura", "ultrahuman", "ringconn"] },
+  { title: "Bracelets",            subtitle: "Whoop, Fitbit, Vivosmart",                       ids: ["whoop", "fitbit"] },
+  { title: "Ceintures et capteurs Bluetooth", subtitle: "Cardio thoracique, puissance pédalier", ids: ["ble-hr", "ble-power"] },
+  { title: "Applis tierces",        subtitle: "Sync historique et upload",                      ids: ["strava"] },
 ];
 
 export default function DevicesSettings() {
@@ -53,6 +56,7 @@ export default function DevicesSettings() {
           return (
             <View key={sec.title} style={styles.section}>
               <Text style={styles.sectionLabel}>{sec.title}</Text>
+              {sec.subtitle && <Text style={styles.sectionSub}>{sec.subtitle}</Text>}
               <View style={{ gap: 10 }}>
                 {items.map((c) => (
                   <ConnectorRow key={c.id} c={c} />
@@ -91,9 +95,16 @@ function ConnectorRow({ c }: { c: ConnectorStatus }) {
         </View>
         <Text style={styles.desc}>{c.description}</Text>
         <View style={styles.metaRow}>
-          {c.capabilities.includes("live-hr") && <CapTag icon="heart-outline" label="HR live" />}
+          {c.capabilities.includes("live-hr") && <CapTag icon="heart-outline" label="Cardio live" />}
           {c.capabilities.includes("live-power") && <CapTag icon="flash-outline" label="Puissance live" />}
+          {c.capabilities.includes("live-cadence") && <CapTag icon="repeat-outline" label="Cadence" />}
           {c.capabilities.includes("live-gps") && <CapTag icon="navigate-outline" label="GPS live" />}
+          {c.capabilities.includes("hrv") && <CapTag icon="pulse-outline" label="HRV" />}
+          {c.capabilities.includes("spo2") && <CapTag icon="water-outline" label="SpO2" />}
+          {c.capabilities.includes("skin-temp") && <CapTag icon="thermometer-outline" label="Température" />}
+          {c.capabilities.includes("sleep") && <CapTag icon="moon-outline" label="Sommeil" />}
+          {c.capabilities.includes("recovery") && <CapTag icon="leaf-outline" label="Récupération" />}
+          {c.capabilities.includes("stress") && <CapTag icon="warning-outline" label="Stress" />}
           {c.capabilities.includes("upload") && <CapTag icon="cloud-upload-outline" label="Upload auto" />}
         </View>
         {c.connected && (
@@ -145,7 +156,8 @@ const styles = StyleSheet.create({
   heroTitle: { ...Type.bodySm, color: Colors.text.primary, fontWeight: "700" },
   heroDesc: { ...Type.bodyXs, color: Colors.text.muted, marginTop: 2, lineHeight: 16 },
   section: { paddingHorizontal: Spacing.lg, marginTop: Spacing.xl },
-  sectionLabel: { ...Type.label, color: Colors.text.muted, marginBottom: 10 },
+  sectionLabel: { ...Type.label, color: Colors.text.muted, marginBottom: 4 },
+  sectionSub: { ...Type.bodyXs, color: Colors.text.muted, marginBottom: 10, fontStyle: "italic" },
   row: { flexDirection: "row", gap: 12, padding: Spacing.md, backgroundColor: Colors.bg.card, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border.subtle, alignItems: "flex-start" },
   brandIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" },

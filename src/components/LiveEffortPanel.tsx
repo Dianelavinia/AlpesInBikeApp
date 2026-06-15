@@ -35,6 +35,20 @@ export default function LiveEffortPanel({ active }: { active: boolean }) {
         <Metric icon="repeat" tint={Colors.brand.forest} value={telemetry.cadence.toString()} unit="rpm" label="Cadence" />
       </View>
 
+      {(telemetry.hrv !== undefined || telemetry.spo2 !== undefined) && (
+        <View style={styles.row}>
+          {telemetry.hrv !== undefined && (
+            <Metric icon="pulse" tint="#0EA5E9" value={telemetry.hrv.toString()} unit="ms" label="HRV" />
+          )}
+          {telemetry.spo2 !== undefined && (
+            <Metric icon="water" tint="#10B981" value={telemetry.spo2.toString()} unit="%" label="SpO2" />
+          )}
+          {telemetry.skinTempDelta !== undefined && (
+            <Metric icon="thermometer" tint="#F59E0B" value={`${telemetry.skinTempDelta > 0 ? "+" : ""}${telemetry.skinTempDelta.toFixed(1)}`} unit="°C" label="T° peau" />
+          )}
+        </View>
+      )}
+
       <View style={styles.zoneBar}>
         {([1, 2, 3, 4, 5] as HrZone[]).map((z) => (
           <View key={z} style={[styles.zoneSeg, { backgroundColor: ZONE_META[z].tint, opacity: telemetry.hrZone === z ? 1 : 0.18 }]} />
@@ -54,6 +68,9 @@ function sourceLabel(s: string): string {
     case "garmin":      return "Garmin";
     case "polar":       return "Polar";
     case "wahoo":       return "Wahoo";
+    case "oura":        return "Oura Ring";
+    case "whoop":       return "Whoop";
+    case "ultrahuman":  return "Ultrahuman Ring";
     default:            return "Simulateur démo";
   }
 }
