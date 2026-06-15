@@ -183,11 +183,15 @@ function NearbyView({
 }
 
 function BuddyCard({ buddy, tryAction }: { buddy: Buddy; tryAction: (a: GatedAction) => boolean }) {
+  const router = useRouter();
   const lvl = LEVEL_META[buddy.level];
   const pc = PACE_META[buddy.pace];
   const buddyTrust = getBuddyTrust(buddy.id);
   return (
-    <View style={styles.buddyCard}>
+    <Pressable
+      onPress={() => router.push(`/buddy/${buddy.id}` as any)}
+      style={({ pressed }) => [styles.buddyCard, pressed && { opacity: 0.94 }]}
+    >
       <View style={styles.buddyHead}>
         <View style={[styles.avatar, { backgroundColor: buddy.avatarColor }]}>
           <Text style={styles.avatarText}>{buddy.avatarInitial}</Text>
@@ -247,7 +251,7 @@ function BuddyCard({ buddy, tryAction }: { buddy: Buddy; tryAction: (a: GatedAct
           </Text>
         </Pressable>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
