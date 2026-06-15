@@ -189,12 +189,12 @@ function BuddyCard({ buddy, tryAction }: { buddy: Buddy; tryAction: (a: GatedAct
   return (
     <View style={styles.buddyCard}>
       <View style={styles.buddyHead}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{buddy.avatar}</Text>
+        <View style={[styles.avatar, { backgroundColor: buddy.avatarColor }]}>
+          <Text style={styles.avatarText}>{buddy.avatarInitial}</Text>
         </View>
         <View style={{ flex: 1 }}>
           <View style={styles.nameRow}>
-            <Text style={styles.buddyName}>{buddy.name}</Text>
+            <Text style={styles.buddyName}>{buddy.displayName}</Text>
             <TrustBadge level={buddyTrust} size="sm" />
             {buddy.isFriend && (
               <View style={styles.friendBadge}>
@@ -205,7 +205,7 @@ function BuddyCard({ buddy, tryAction }: { buddy: Buddy; tryAction: (a: GatedAct
           </View>
           <View style={styles.metaRow}>
             <Ionicons name="location-outline" size={11} color={Colors.text.muted} />
-            <Text style={styles.metaText}>{buddy.city} · {buddy.distanceKm} km</Text>
+            <Text style={styles.metaText}>{buddy.zone} · {buddy.distanceRange}</Text>
           </View>
         </View>
         <View style={styles.matchPill}>
@@ -316,13 +316,13 @@ function GroupCard({ g, tryAction }: { g: GroupRide; tryAction: (a: GatedAction)
 
       <View style={styles.groupBottom}>
         <View style={styles.organizerRow}>
-          <View style={styles.smAvatar}>
-            <Text style={styles.smAvatarText}>{g.organizer.avatar}</Text>
+          <View style={[styles.smAvatar, { backgroundColor: g.organizer.avatarColor }]}>
+            <Text style={styles.smAvatarText}>{g.organizer.avatarInitial}</Text>
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.organizerLabel}>Organisé par</Text>
             <View style={styles.organizerNameRow}>
-              <Text style={styles.organizerName}>{g.organizer.name}</Text>
+              <Text style={styles.organizerName}>{g.organizer.displayName}</Text>
               <TrustBadge level={organizerTrust} size="sm" />
             </View>
           </View>
@@ -377,11 +377,11 @@ function RequestCard({ r }: { r: BuddyRequest }) {
   return (
     <View style={styles.reqCard}>
       <View style={styles.buddyHead}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{r.buddy.avatar}</Text>
+        <View style={[styles.avatar, { backgroundColor: r.buddy.avatarColor }]}>
+          <Text style={styles.avatarText}>{r.buddy.avatarInitial}</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.buddyName}>{r.buddy.name}</Text>
+          <Text style={styles.buddyName}>{r.buddy.displayName}</Text>
           <Text style={styles.metaText}>{r.sentAt}</Text>
         </View>
         <View style={[styles.dirBadge, { backgroundColor: r.direction === "received" ? "rgba(225,90,35,0.12)" : Colors.bg.elevated }]}>

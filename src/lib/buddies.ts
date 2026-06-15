@@ -1,13 +1,15 @@
 /**
  * Recherche de copains de route.
  *
- * 3 sections principales :
- *   1. Rideurs compatibles (filtre par niveau, vélo, allure, langues, dispo)
- *   2. Sorties groupe planifiées (rejoindre une sortie organisee par qqun)
- *   3. Invitations recues / envoyees
+ * IDENTITE PUBLIQUE vs PRIVEE :
+ *   Public (toujours visible) : pseudo (displayName), avatar (couleur+initiale ou photo),
+ *     tranche d age, zone geographique floue, distance approximative, niveau, allure,
+ *     bike types, vibes, langues, bio moderee
+ *   Prive (uniquement apres acceptation mutuelle d invitation) :
+ *     vrai nom, ville exacte, age exact, contact direct
  *
- * En prod : table `buddy_profiles`, `group_rides`, `group_ride_members`,
- * `buddy_requests` dans Supabase, avec RPC `find_nearby_buddies(lat, lng, filters)`.
+ * En prod : table buddy_profiles Supabase avec colonnes public/private.
+ * Le pseudo est unique, choisi a l inscription, modifiable une fois par mois.
  */
 
 import { useEffect, useState } from "react";
@@ -21,25 +23,30 @@ export type Vibe = "famille" | "decouverte" | "perf" | "social";
 
 export type Buddy = {
   id: string;
-  name: string;
-  avatar: string;
-  age: number;
+
+  // ----- IDENTITE PUBLIQUE -----
+  displayName: string;        // pseudo public
+  avatarInitial: string;      // 1-2 lettres du pseudo
+  avatarColor: string;        // couleur fond generee deterministe
+  avatarUrl?: string;          // photo uploadee optionnelle
   sex: Sex;
   ageBracket: AgeBracket;
-  city: string;
+  zone: string;                // zone floue ex "Massif des Bauges"
+  distanceRange: string;       // ex "Moins de 5 km"
   bikes: BikeKind[];
   level: Level;
   pace: Pace;
   vibes: Vibe[];
   languages: string[];
-  bio: string;
-  availability: string[]; // ex: ["sam matin", "dim apres-midi"]
+  bio: string;                 // bio moderee, pas d info privee
   ridesCount: number;
   badges: number;
-  distanceKm: number;        // distance par rapport a moi
-  matchScore: number;        // 0-100
+  matchScore: number;          // 0-100
   isFriend: boolean;
   alreadyInvited?: boolean;
+
+  // ----- TRI INTERNE (jamais affiche) -----
+  distanceKm: number;
 };
 
 export type GroupRide = {
@@ -55,8 +62,8 @@ export type GroupRide = {
   pace: Pace;
   vibe: Vibe;
   bikeKinds: BikeKind[];
-  organizer: { id: string; name: string; avatar: string };
-  participants: { id: string; name: string; avatar: string }[];
+  organizer: { id: string; displayName: string; avatarInitial: string; avatarColor: string };
+  participants: { id: string; displayName: string; avatarInitial: string; avatarColor: string }[];
   maxParticipants: number;
   description: string;
   meetingPoint: string;
@@ -73,7 +80,39 @@ export type BuddyRequest = {
 };
 
 // ---------------------------------------------------------------------------
-// Métadonnées UI partagées
+// Generateur deterministe pseudo + couleur + initiale a partir d un id
+// ---------------------------------------------------------------------------
+
+const AVATAR_PALETTE = [
+  "#0D4F3D", "#E15A23", "#7C3AED", "#0369A1", "#F59E0B",
+  "#10B981", "#EF4444", "#B8431A", "#4B916D", "#0EA5E9",
+];
+
+export function avatarColorFor(id: string): string {
+  const hash = id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+}
+
+export function avatarInitialFor(displayName: string): string {
+  const cleaned = displayName.replace(/[^a-zA-Z0-9]/g, "");
+  if (cleaned.length === 0) return "?";
+  if (cleaned.length === 1) return cleaned.toUpperCase();
+  // Pseudo "LeaM" -> LM, pseudo "Trail42" -> TR
+  const upper = cleaned.replace(/[^A-Z0-9]/g, "");
+  if (upper.length >= 2) return upper.slice(0, 2);
+  return cleaned.slice(0, 2).toUpperCase();
+}
+
+function distanceRangeFor(km: number): string {
+  if (km < 5) return "Moins de 5 km";
+  if (km < 10) return "5 à 10 km";
+  if (km < 25) return "10 à 25 km";
+  if (km < 50) return "25 à 50 km";
+  return "Plus de 50 km";
+}
+
+// ---------------------------------------------------------------------------
+// Metadonnees UI partagees
 // ---------------------------------------------------------------------------
 
 export const LEVEL_META: Record<Level, { label: string; tint: string }> = {
@@ -107,20 +146,52 @@ export const BIKE_META: Record<BikeKind, { label: string; icon: string }> = {
 };
 
 // ---------------------------------------------------------------------------
-// Mock data
+// Mock data : pseudos varies, pas de vrais noms, pas de villes exactes
 // ---------------------------------------------------------------------------
 
+function mockBuddy(p: {
+  id: string;
+  displayName: string;
+  sex: Sex;
+  ageBracket: AgeBracket;
+  zone: string;
+  distanceKm: number;
+  bikes: BikeKind[];
+  level: Level;
+  pace: Pace;
+  vibes: Vibe[];
+  languages: string[];
+  bio: string;
+  ridesCount: number;
+  badges: number;
+  matchScore: number;
+  isFriend: boolean;
+}): Buddy {
+  return {
+    ...p,
+    avatarInitial: avatarInitialFor(p.displayName),
+    avatarColor: avatarColorFor(p.id),
+    distanceRange: distanceRangeFor(p.distanceKm),
+  };
+}
+
 export const BUDDIES: Buddy[] = [
-  { id: "b-1", name: "Léa Martin",        avatar: "LM", age: 29, sex: "F", ageBracket: "25_34", city: "Aix-les-Bains",   bikes: ["vttae","vtt"],     level: "confirme",       pace: "regulier",   vibes: ["decouverte","social"], languages: ["FR","EN"], bio: "Massif des Bauges au lever du jour, j adore.", availability: ["sam matin","dim matin"],         ridesCount: 62, badges: 11, distanceKm: 4,  matchScore: 96, isFriend: true },
-  { id: "b-2", name: "Alexis Petit",      avatar: "AP", age: 27, sex: "H", ageBracket: "25_34", city: "Annecy",          bikes: ["route","gravel"],  level: "expert",         pace: "soutenu",    vibes: ["perf"],                languages: ["FR"],      bio: "Tour du lac le matin avant le boulot. On part a fond.", availability: ["lun-ven 6h-8h"], ridesCount: 118, badges: 9, distanceKm: 22, matchScore: 78, isFriend: false },
-  { id: "b-3", name: "Camille Rivière",   avatar: "CR", age: 32, sex: "F", ageBracket: "25_34", city: "Aix-les-Bains",   bikes: ["vttae"],            level: "intermediaire",   pace: "regulier",   vibes: ["famille","social"],   languages: ["FR","IT"], bio: "Sorties chill en couple ou avec les enfants. 2 ados.", availability: ["sam apres-midi","dim"],       ridesCount: 58, badges: 7, distanceKm: 2,  matchScore: 92, isFriend: true },
-  { id: "b-4", name: "Hugo Fontaine",      avatar: "HF", age: 28, sex: "H", ageBracket: "25_34", city: "Chamonix",         bikes: ["vtt","vttae"],       level: "expert",         pace: "competitif", vibes: ["perf","decouverte"],  languages: ["FR","EN","DE"], bio: "Massif du Mont-Blanc, je guide aussi du single technique.", availability: ["weekend complet"], ridesCount: 184, badges: 11, distanceKm: 78, matchScore: 71, isFriend: false },
-  { id: "b-5", name: "Sophie Faure",       avatar: "SF", age: 41, sex: "F", ageBracket: "35_44", city: "Chambéry",          bikes: ["route"],             level: "confirme",       pace: "soutenu",    vibes: ["perf","social"],       languages: ["FR"],      bio: "Cycliste route, prepare la Marmotte 2026. Cherche binome.", availability: ["mer soir","dim matin"], ridesCount: 142, badges: 6, distanceKm: 12, matchScore: 84, isFriend: true },
-  { id: "b-6", name: "Mathieu Garnier",    avatar: "MG", age: 22, sex: "H", ageBracket: "u25",   city: "Chambéry",          bikes: ["vtt"],                level: "expert",         pace: "competitif", vibes: ["perf"],                languages: ["FR","EN"], bio: "Enduro et bikepark, j'enchaine les laps a Aillon.",       availability: ["sam","dim"],                ridesCount: 89, badges: 7, distanceKm: 11, matchScore: 65, isFriend: false },
-  { id: "b-7", name: "Aurélie Roux",       avatar: "AR", age: 30, sex: "F", ageBracket: "25_34", city: "Aix-les-Bains",     bikes: ["vttae","ville"],     level: "decouverte",      pace: "tranquille", vibes: ["famille","decouverte"], languages: ["FR"],      bio: "Reprise du velo apres bebe. Sortie cool autour du lac.",  availability: ["mer matin","sam matin"],    ridesCount: 18, badges: 5, distanceKm: 1,  matchScore: 88, isFriend: true },
-  { id: "b-8", name: "Damien Marchal",     avatar: "DM", age: 31, sex: "H", ageBracket: "25_34", city: "Romans",            bikes: ["gravel"],             level: "confirme",       pace: "regulier",   vibes: ["decouverte","social"], languages: ["FR"],      bio: "Gravel sur la Drome, ouvert pour decouvrir de nouvelles routes.", availability: ["sam"],                  ridesCount: 76, badges: 10, distanceKm: 96, matchScore: 62, isFriend: false },
-  { id: "b-9", name: "Nadia Chevalier",    avatar: "NC", age: 39, sex: "F", ageBracket: "35_44", city: "Aix-les-Bains",     bikes: ["vttae","route"],      level: "intermediaire",   pace: "regulier",   vibes: ["social","famille"],   languages: ["FR","AR"], bio: "Sorties tranquilles, j'adore raconter mes balades autour d un cafe.", availability: ["jeu matin","sam apres-midi"], ridesCount: 44, badges: 9, distanceKm: 3,  matchScore: 90, isFriend: true },
+  mockBuddy({ id: "b-1", displayName: "Aurore",     sex: "F", ageBracket: "25_34", zone: "Massif des Bauges",   distanceKm: 4,  bikes: ["vttae","vtt"],     level: "confirme",       pace: "regulier",    vibes: ["decouverte","social"], languages: ["FR","EN"],       bio: "Massif des Bauges au lever du jour, j adore.",                                  ridesCount: 62,  badges: 11, matchScore: 96, isFriend: true }),
+  mockBuddy({ id: "b-2", displayName: "RoutardLac", sex: "H", ageBracket: "25_34", zone: "Lac d Annecy",        distanceKm: 22, bikes: ["route","gravel"],  level: "expert",         pace: "soutenu",     vibes: ["perf"],                languages: ["FR"],            bio: "Tour du lac le matin avant le boulot.",                                            ridesCount: 118, badges: 9,  matchScore: 78, isFriend: false }),
+  mockBuddy({ id: "b-3", displayName: "Cam",         sex: "F", ageBracket: "25_34", zone: "Massif des Bauges",   distanceKm: 2,  bikes: ["vttae"],            level: "intermediaire", pace: "regulier",    vibes: ["famille","social"],   languages: ["FR","IT"],       bio: "Sorties chill, j aime decouvrir de nouveaux sentiers.",                          ridesCount: 58,  badges: 7,  matchScore: 92, isFriend: true }),
+  mockBuddy({ id: "b-4", displayName: "GuideMB",     sex: "H", ageBracket: "25_34", zone: "Mont-Blanc",          distanceKm: 78, bikes: ["vtt","vttae"],      level: "expert",         pace: "competitif",  vibes: ["perf","decouverte"], languages: ["FR","EN","DE"],  bio: "Guide single technique en haute montagne.",                                       ridesCount: 184, badges: 11, matchScore: 71, isFriend: false }),
+  mockBuddy({ id: "b-5", displayName: "MarmotteFan",sex: "F", ageBracket: "35_44", zone: "Massif de la Chartreuse", distanceKm: 12, bikes: ["route"],         level: "confirme",       pace: "soutenu",     vibes: ["perf","social"],       languages: ["FR"],            bio: "Cycliste route, prepare la Marmotte 2026. Cherche binome regulier.",            ridesCount: 142, badges: 6,  matchScore: 84, isFriend: true }),
+  mockBuddy({ id: "b-6", displayName: "EnduroKid",  sex: "H", ageBracket: "u25",   zone: "Massif de la Chartreuse", distanceKm: 11, bikes: ["vtt"],          level: "expert",         pace: "competitif",  vibes: ["perf"],                languages: ["FR","EN"],       bio: "Enduro et bikepark, j enchaine les laps.",                                         ridesCount: 89,  badges: 7,  matchScore: 65, isFriend: false }),
+  mockBuddy({ id: "b-7", displayName: "VeloVerte",  sex: "F", ageBracket: "25_34", zone: "Lac du Bourget",      distanceKm: 1,  bikes: ["vttae","ville"],    level: "decouverte",      pace: "tranquille",  vibes: ["famille","decouverte"], languages: ["FR"],          bio: "Reprise du velo en douceur. Sortie cool autour du lac.",                         ridesCount: 18,  badges: 5,  matchScore: 88, isFriend: true }),
+  mockBuddy({ id: "b-8", displayName: "GravelDrome",sex: "H", ageBracket: "25_34", zone: "Vercors",              distanceKm: 96, bikes: ["gravel"],            level: "confirme",       pace: "regulier",    vibes: ["decouverte","social"], languages: ["FR"],          bio: "Gravel sur les routes blanches, ouvert pour decouvrir.",                        ridesCount: 76,  badges: 10, matchScore: 62, isFriend: false }),
+  mockBuddy({ id: "b-9", displayName: "Nada",        sex: "F", ageBracket: "35_44", zone: "Massif des Bauges",   distanceKm: 3,  bikes: ["vttae","route"],    level: "intermediaire",  pace: "regulier",    vibes: ["social","famille"],   languages: ["FR","AR"],       bio: "Sorties tranquilles, j aime echanger autour d un cafe en fin de balade.",       ridesCount: 44,  badges: 9,  matchScore: 90, isFriend: true }),
 ];
+
+function orgFromBuddy(b: Buddy): { id: string; displayName: string; avatarInitial: string; avatarColor: string } {
+  return { id: b.id, displayName: b.displayName, avatarInitial: b.avatarInitial, avatarColor: b.avatarColor };
+}
+
+const FIND = (id: string) => BUDDIES.find((b) => b.id === id)!;
 
 export const GROUP_RIDES: GroupRide[] = [
   {
@@ -136,14 +207,11 @@ export const GROUP_RIDES: GroupRide[] = [
     pace: "regulier",
     vibe: "decouverte",
     bikeKinds: ["vttae","vtt"],
-    organizer: { id: "b-1", name: "Léa Martin", avatar: "LM" },
-    participants: [
-      { id: "b-3", name: "Camille R.", avatar: "CR" },
-      { id: "b-9", name: "Nadia C.",   avatar: "NC" },
-    ],
+    organizer: orgFromBuddy(FIND("b-1")),
+    participants: [orgFromBuddy(FIND("b-3")), orgFromBuddy(FIND("b-9"))],
     maxParticipants: 8,
-    description: "On part du parking du Revard au lever du jour, on enchaine les single track avec la lumiere magique. Cafe et viennoiseries au sommet.",
-    meetingPoint: "Parking du Revard, 06h15",
+    description: "Depart parking du Revard, single track avec la lumiere matinale. Pause cafe au sommet.",
+    meetingPoint: "Parking public du Revard, 06h15. Coordonnees GPS partagees aux participants.",
     open: true,
   },
   {
@@ -159,20 +227,18 @@ export const GROUP_RIDES: GroupRide[] = [
     pace: "soutenu",
     vibe: "perf",
     bikeKinds: ["route"],
-    organizer: { id: "b-5", name: "Sophie Faure", avatar: "SF" },
-    participants: [
-      { id: "b-2", name: "Alexis P.", avatar: "AP" },
-    ],
+    organizer: orgFromBuddy(FIND("b-5")),
+    participants: [orgFromBuddy(FIND("b-2"))],
     maxParticipants: 6,
-    description: "Tour du lac avec relais, on tient les 32 km/h de moyenne. Idee preparer la Marmotte. Ravito a Brison-Saint-Innocent.",
-    meetingPoint: "Esplanade du Petit Port, 07h45",
+    description: "Tour du lac avec relais, on tient les 32 km/h de moyenne. Bon entrainement.",
+    meetingPoint: "Lieu public d Aix-les-Bains, 07h45. Coordonnees GPS partagees aux participants.",
     open: true,
   },
   {
     id: "g-3",
     title: "Voie verte famille Annecy",
     cover: "https://images.unsplash.com/photo-1594056466093-52bcbc7f5e4b?w=900&q=85",
-    zone: "Voie verte d Annecy",
+    zone: "Lac d Annecy",
     dateLabel: "Samedi 21 juin",
     startTime: "10h00",
     distanceKm: 24,
@@ -181,11 +247,11 @@ export const GROUP_RIDES: GroupRide[] = [
     pace: "tranquille",
     vibe: "famille",
     bikeKinds: ["vttae","ville","vtt"],
-    organizer: { id: "b-7", name: "Aurélie Roux", avatar: "AR" },
+    organizer: orgFromBuddy(FIND("b-7")),
     participants: [],
     maxParticipants: 12,
-    description: "Sortie pour les familles avec enfants des 6 ans. On s'arrete pique-niquer a Sevrier, glace en fin de balade.",
-    meetingPoint: "Office de tourisme d Annecy, 09h45",
+    description: "Sortie pour les familles avec enfants des 6 ans. Pique-nique a mi-chemin.",
+    meetingPoint: "Office de tourisme d Annecy, 09h45.",
     open: true,
   },
   {
@@ -201,11 +267,11 @@ export const GROUP_RIDES: GroupRide[] = [
     pace: "soutenu",
     vibe: "perf",
     bikeKinds: ["vtt"],
-    organizer: { id: "b-6", name: "Mathieu Garnier", avatar: "MG" },
-    participants: [{ id: "b-4", name: "Hugo F.", avatar: "HF" }],
+    organizer: orgFromBuddy(FIND("b-6")),
+    participants: [orgFromBuddy(FIND("b-4"))],
     maxParticipants: 5,
-    description: "On envoie sur les sentiers techniques du Semnoz. Protections recommandees, pas de debutants.",
-    meetingPoint: "Telesiege du Semnoz, 12h45",
+    description: "Sentiers techniques. Protections recommandees.",
+    meetingPoint: "Telesiege du Semnoz, 12h45.",
     open: true,
   },
 ];
@@ -213,15 +279,15 @@ export const GROUP_RIDES: GroupRide[] = [
 export const BUDDY_REQUESTS: BuddyRequest[] = [
   {
     id: "req-1",
-    buddy: BUDDIES.find((b) => b.id === "b-2")!,
+    buddy: FIND("b-2"),
     direction: "received",
-    message: "Salut Marie, je tente le tour du lac samedi 8h, ca te dirait de te joindre ? Allure soutenue mais rien de fou.",
+    message: "Salut, je tente le tour du lac samedi 8h, ca te dirait de te joindre ? Allure soutenue mais rien de fou.",
     sentAt: "Il y a 2 h",
     status: "pending",
   },
   {
     id: "req-2",
-    buddy: BUDDIES.find((b) => b.id === "b-8")!,
+    buddy: FIND("b-8"),
     direction: "sent",
     message: "Hello, je viens dans la Drome le 28 juin pour 3 jours. Une sortie gravel ?",
     sentAt: "Hier",
@@ -230,7 +296,7 @@ export const BUDDY_REQUESTS: BuddyRequest[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Filters
+// Filtres
 // ---------------------------------------------------------------------------
 
 export type BuddyFilters = {
@@ -248,10 +314,6 @@ export function filterBuddies(filters: BuddyFilters): Buddy[] {
     .filter((b) => b.distanceKm <= filters.maxDistanceKm)
     .sort((a, b) => b.matchScore - a.matchScore);
 }
-
-// ---------------------------------------------------------------------------
-// API : tout est mock pour la demo, Supabase quand le schema sera pose
-// ---------------------------------------------------------------------------
 
 export function useBuddies(filters: BuddyFilters) {
   const [list, setList] = useState<Buddy[]>([]);
