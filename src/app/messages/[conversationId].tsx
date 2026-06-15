@@ -10,21 +10,25 @@ import { BUDDIES } from "@/lib/buddies";
 export default function ConversationThread() {
   const router = useRouter();
   const params = useLocalSearchParams<{ conversationId?: string; to?: string }>();
-  // Soit on ouvre une conversation existante, soit on cree depuis /messages/new?to=buddyId
-  let conversationId = params.conversationId;
-  let buddyId: string | undefined;
+  const [conversationId, setConversationId] = useState<string>("");
+  const [buddyId, setBuddyId] = useState<string>("");
 
-  if (conversationId === "new" && params.to) {
-    const conv = getOrCreateConversation(params.to);
-    conversationId = conv.id;
-    buddyId = params.to;
-  } else {
-    const conv = getConversations().find((c) => c.id === conversationId);
-    buddyId = conv?.withBuddyId;
-  }
+  useEffect(() => {
+    (async () => {
+      if (params.conversationId === "new" && params.to) {
+        const conv = await getOrCreateConversation(params.to);
+        setConversationId(conv.id);
+        setBuddyId(params.to);
+      } else if (params.conversationId) {
+        const conv = getConversations().find((c) => c.id === params.conversationId);
+        setConversationId(params.conversationId);
+        setBuddyId(conv?.withBuddyId ?? "");
+      }
+    })();
+  }, [params.conversationId, params.to]);
 
   const buddy = buddyId ? BUDDIES.find((b) => b.id === buddyId) : undefined;
-  const { messages, send } = useMessages(conversationId ?? "", buddyId ?? "");
+  const { messages, send } = useMessages(conversationId, buddyId);
   const [input, setInput] = useState("");
   const scrollRef = useRef<ScrollView | null>(null);
 

@@ -6,6 +6,7 @@ import RideMap from "@/components/RideMap";
 import LiveEffortPanel from "@/components/LiveEffortPanel";
 import { Colors, Radius, Spacing, Type } from "@/constants/theme";
 import { useRideTracker, formatElapsed, mpsToKmh } from "@/lib/ride-tracker";
+import { saveRide } from "@/lib/ride-save";
 
 export default function RecordRide() {
   const router = useRouter();
@@ -32,9 +33,18 @@ export default function RecordRide() {
 
   async function handleFinish() {
     const final = await stop();
-    // En prod : await supabase.from("rides").insert({ ...final })
-    console.log("[ride] saved", { distance_m: final.distanceM, points: final.points.length });
-    router.replace("/(tabs)/community");
+    const result = await saveRide({
+      stats: final,
+      title: "Ride enregistré",
+      zone: "Massif des Bauges",
+      isPublic: false,
+    });
+    if (result.ok) {
+      router.replace(`/share/${result.rideId}` as any);
+    } else {
+      Alert.alert("Sauvegarde", result.error);
+      router.replace("/(tabs)/community");
+    }
     setTimeout(reset, 500);
   }
 
