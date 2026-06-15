@@ -55,8 +55,16 @@ const SECTIONS = [
     items: [
       { icon: "download-outline" as const, label: "Exporter mes données", color: Colors.brand.forest },
       { icon: "trash-outline" as const, label: "Supprimer mon compte", color: "#EF4444" },
-      { icon: "document-text-outline" as const, label: "Politique de confidentialité", color: Colors.text.secondary },
-      { icon: "checkmark-circle-outline" as const, label: "RGPD et cookies", hint: "Conforme", color: Colors.brand.forest },
+      { icon: "document-text-outline" as const, label: "Politique de confidentialité", color: Colors.text.secondary, route: "/legal/privacy" },
+      { icon: "checkmark-circle-outline" as const, label: "RGPD et cookies", hint: "Conforme", color: Colors.brand.forest, route: "/legal/privacy" },
+    ],
+  },
+  {
+    title: "Mentions légales",
+    items: [
+      { icon: "reader-outline" as const, label: "Conditions Générales d'Utilisation", color: Colors.text.secondary, route: "/legal/terms" },
+      { icon: "shield-outline" as const, label: "Charte communauté", color: Colors.brand.forest, route: "/legal/community" },
+      { icon: "shield-checkmark-outline" as const, label: "Ma vérification", hint: "Email vérifié", color: Colors.brand.orange, route: "/verify" },
     ],
   },
 ];
@@ -82,7 +90,7 @@ export default function Settings() {
               {section.items.map((item, i) => (
                 <Pressable
                   key={item.label}
-                  onPress={() => item.route && router.push(item.route as any)}
+                  onPress={() => (item as any).route && router.push((item as any).route)}
                   style={[styles.row, i !== section.items.length - 1 && styles.rowBorder]}
                 >
                   <View style={[styles.icon, { backgroundColor: `${item.color}15` }]}>

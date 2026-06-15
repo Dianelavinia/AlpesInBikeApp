@@ -102,7 +102,15 @@
           "NSHealthUpdateUsageDescription": "Alpes in Bike enregistre vos rides dans l'app Santé."
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#E15A23",
+          "sounds": []
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
